@@ -1,0 +1,41 @@
+# Bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Logs
+*.log
+
+# Data files (remove if you want to version them)
+data.json
+changelog.json
+
+# Backup or temp files
+*.bak
+*.tmp
+*.swp
+*.~*
+
+# VSCode settings (optional)
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Virtual environments (if you use one)
+venv/
+env/
+.venv/
+
+# Compiled curses layout previews (if generated manually)
+*.png
+*.svg
+
+# Build artifacts (if any future packaging is done)
+build/
+dist/
+*.egg-info/
+
+# Optional: secrets or config overrides
+config.ini

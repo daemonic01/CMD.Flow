@@ -1,0 +1,76 @@
+{
+    "menu": {
+      "title": "Főmenü",
+      "cards_title": "Projektek",
+      "options": {
+        "projects": "Projektkezelés",
+        "new_project": "Új projekt létrehozása",
+        "settings": "Beállítások",
+        "changelog": "Változásnapló",
+        "exit": "Kilépés"
+      },
+      "changelog_title": "Változásnapló",
+      "main_menu_info_box_title": "Információ",
+      "loaded_projects": "Betöltött projektek",
+      "projects_done": "kész",
+      "projects_in_progress": "folyamatban",
+      "next_deadline": "Következő határidő",
+
+
+      "exit_confirm": "Biztosan kilépsz?"
+    },
+    "main": {
+      "header": "Projektkezelő",
+      "no_projects": "Nincs még projekted.",
+      "breadcrumb": "Navigáció:",
+      "delete_confirm": "Biztosan törlöd?"
+    },
+    "form": {
+      "title": "Új {level} létrehozása",
+      "fields": {
+        "name": "Név",
+        "description": "Leírás",
+        "deadline": "Határidő (YYYY-MM-DD)"
+      },
+      "errors": {
+        "missing_name": "A név megadása kötelező!",
+        "invalid_date": "Hibás formátum vagy múltbéli dátum!"
+      },
+      "messages": {
+        "saved": "Sikeresen elmentve.",
+        "cancelled": "Létrehozás megszakítva."
+      }
+    },
+    "footer": {
+      "actions": {
+        "save": "Mentés",
+        "new": "Új elem",
+        "delete": "Elem törlése",
+        "menu": "Főmenü",
+        "exit": "Kilépés"
+      },
+      "info_panel": {
+        "active_version": "Aktív verzió",
+        "build": "Build"
+      }
+    },
+    "error": {
+      "unknown": "Ismeretlen hiba történt."
+    },
+
+    "week": {
+      "Monday": "hétfő",
+      "Tuesday": "kedd",
+      "Wednesday": "szerda",
+      "Thursday": "csütörtök",
+      "Friday": "péntek",
+      "Saturday": "szombat",
+      "Sunday": "vasárnap"
+  },
+
+    "errors": {
+      "window_size_error_message_1": "A program megjelenítése jelenleg nem támogatja ezt az ablakméretet.",
+      "window_size_error_message_2": "A folytatáshoz növeld meg az ablak méretét."
+  }
+}
+  
