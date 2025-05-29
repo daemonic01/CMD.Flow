@@ -23,7 +23,7 @@ class FooterController:
         elif key in ('\n', 10, 13):
             return self.handle_key(key)
         elif key in (9, '\t'):  # TAB
-            ctx.control.focus = "main"
+            ctx.control.focus = ctx.control.last_focus
 
     
     def handle_key(self, key):
@@ -56,3 +56,6 @@ class FooterController:
                 win.addstr(2, col, text, attr)
             col += len(text) + 2
 
+    def add_action_once(self, label: str, key, callback):
+        if not any(a["key"] == key for a in self.actions):
+            self.add_action(label, key, callback)

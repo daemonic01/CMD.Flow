@@ -7,18 +7,20 @@ from ui.common.footer import FooterController
 from ui.views.base_view import BaseView
 from utils.layout import update_screen_size
 from ui.common.render_box import render_boxed
+from utils.logger import log
 
 
 class NewEntryFormView(BaseView):
-    def __init__(self, ctx, level, parent=None):
+    def __init__(self, ctx, level, parent=None, initial_values=None, edit_target=None):
         super().__init__(ctx)
         self.level = level
         self.parent = parent
         self.fields = ["Név", "Leírás", "Határidő (YYYY-MM-DD)", "Prioritás"]
-        self.values = ["", "", "", ""]
+        self.values = initial_values or ["", "", "", ""]
         self.current_idx = 0
         self.should_exit = False
         self.wait_ms = 2000
+        self.edit_target = edit_target
 
         self.footer = FooterController()
         self.footer.add_action("Mentés", "s", self.save_and_exit)
@@ -32,7 +34,8 @@ class NewEntryFormView(BaseView):
             self.ctx.data["projects"],
             self.level,
             parent=self.parent,
-            wait_ms=self.wait_ms
+            wait_ms=self.wait_ms,
+            edit_target=self.edit_target
         )
         if result["status"] == "success" and result["exit"]:
             self.should_exit = True

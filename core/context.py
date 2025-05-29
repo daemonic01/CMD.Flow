@@ -22,6 +22,7 @@ class ControlState:
         self.mode = "menu"
         self.focus = "main"
         self.prev_mode = None
+        self.last_focus = None
         self.screen_changed = False
         self.layout_blocked = False
 

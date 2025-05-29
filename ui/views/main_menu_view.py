@@ -21,6 +21,7 @@ from utils.logger import log
 class MainMenuView(BaseView):
     def __init__(self, ctx):
         super().__init__(ctx)
+        self.last_focus = ctx.control.last_focus
         self.selected_idx = 0
         self.card_idx = 0
         self.scroll_offset = 0
@@ -73,17 +74,20 @@ class MainMenuView(BaseView):
 
 
 
-        if self.ctx.control.focus in ("cards", "footer") and not self.footer_updated:
-            self.footer.add_action("Törlés", "d", lambda: PopupConfirmView(
-                self.ctx,
-                message="Törlöd a kiválasztott projektet?",
-                on_accept=lambda: self.delete_selected_project(),
-                on_cancel=lambda: "pop"
-            ))
+        if (self.ctx.control.focus == "footer" and self.ctx.control.last_focus == "cards" and not self.footer_updated):
+
+            self.footer.add_action_once("Törlés", "d", lambda: PopupConfirmView(
+            self.ctx,
+            message="Törlöd a kiválasztott projektet?",
+            on_accept=lambda: self.delete_selected_project(),
+            on_cancel=lambda: "pop"
+        ))
+            self.footer.add_action_once("Szerkesztés", "e", self.open_edit_form)
+
             self.footer_updated = True
 
         elif self.ctx.control.focus not in ("cards", "footer") and self.footer_updated:
-            self.footer.actions = [a for a in self.footer.actions if a["key"] != "d"]
+            self.footer.actions = [a for a in self.footer.actions if a["key"] not in ("d", "e")]
             self.footer_updated = False
 
 
@@ -148,7 +152,8 @@ class MainMenuView(BaseView):
                     on_accept=lambda: exit(),
                     on_cancel=lambda: "pop"
                 )
-        elif key in (9, '\t'):
+        if key in (9, '\t'):
+            self.ctx.control.last_focus = self.ctx.control.focus
             self.ctx.control.focus = "footer"
 
 
@@ -195,6 +200,7 @@ class MainMenuView(BaseView):
                     on_cancel=lambda: "pop"
                 )
         elif key in (9, '\t'):
+            self.ctx.control.last_focus = self.ctx.control.focus
             self.ctx.control.focus = "footer"
         elif key == '' or key == 27:
             self.layout["middle"][1].erase()
@@ -247,3 +253,28 @@ class MainMenuView(BaseView):
         self.scroll_offset = max(0, self.card_idx - visible + 1)
         self.ctx.control.focus = "cards"
         return "pop"
+    
+
+
+
+
+    def open_edit_form(self):
+        projects = self.ctx.data["projects"]
+        if not (0 <= self.card_idx < len(projects)):
+            return "pop"
+
+        project = projects[self.card_idx]
+        values = [
+            project.title,
+            project.full_desc or "",
+            project.deadline or "",
+            project.priority or ""
+        ]
+
+
+        return NewEntryFormView(
+            ctx=self.ctx,
+            level="project",
+            initial_values=values,
+            edit_target=project
+        )

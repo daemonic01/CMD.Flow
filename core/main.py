@@ -16,7 +16,7 @@ from utils.layout import update_screen_size
 
 def main(stdscr):
     stdscr.clear()
-    stdscr.timeout(800)
+    stdscr.timeout(120)
     curses.curs_set(0)
     ctx = AppContext()
     view_stack = [MainMenuView(ctx)]

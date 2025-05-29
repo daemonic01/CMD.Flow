@@ -3,6 +3,7 @@ import os
 from typing import TYPE_CHECKING
 import curses
 from utils.date_utils import is_valid_date
+from utils.logger import log
 
 
 if TYPE_CHECKING:
@@ -24,7 +25,7 @@ def load_projects_from_file(filename="data.json") -> list["Project"]:
 
 
 
-def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2000):
+def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2000, edit_target=None):
     curses.curs_set(0)
 
     title = values[0].strip()
@@ -50,7 +51,16 @@ def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2
 
     from core.backend import Project, Phase, Task, Subtask
     if level == "project":
-        projects.append(Project(**entry_data))
+        log("PROJEKT LEVEL: TRUE")
+        if edit_target:
+            log("EDIT TARGET: TRUE")
+            edit_target.title = entry_data["title"]
+            edit_target.full_desc = entry_data["full_desc"]
+            edit_target.deadline = entry_data["deadline"]
+            edit_target.priority = entry_data.get("priority", 1)
+
+        else:
+            projects.append(Project(**entry_data))
     elif level == "phase" and parent:
         parent.phases.append(Phase(**entry_data))
     elif level == "task" and parent:
