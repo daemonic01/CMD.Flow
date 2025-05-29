@@ -80,7 +80,7 @@ class NewEntryFormView(BaseView):
             self.values[self.current_idx] = self.values[self.current_idx][:-1]
         elif key in (9, '\t'):
             self.ctx.control.focus = "footer"
-        elif key == '' or key == 27:  # ESC
+        elif key == '' or key == 27:
             curses.curs_set(0)
             return "pop"
         elif key == curses.KEY_F10:

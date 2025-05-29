@@ -34,6 +34,7 @@ class MainMenuView(BaseView):
             t("menu.options.exit")
         ]
         # FooterController handles footer actions and input hints shown at the bottom of the UI
+        self.footer_updated = False
         self.footer = FooterController()
         self.footer.add_action(t("footer.actions.exit"), "q", lambda: PopupConfirmView(
                     self.ctx,
@@ -41,6 +42,7 @@ class MainMenuView(BaseView):
                     on_accept=lambda: "exit",
                     on_cancel=lambda: "pop"
                 ))
+        
 
 
     def render(self, stdscr):
@@ -68,6 +70,30 @@ class MainMenuView(BaseView):
                 title=t("menu.cards_title"),
                 border_chars=["|", "|", "-", "-", "+", "+", "+", "+"]
             )
+
+
+
+        if self.ctx.control.focus in ("cards", "footer") and not self.footer_updated:
+            self.footer.add_action("Törlés", "d", lambda: PopupConfirmView(
+                self.ctx,
+                message="Törlöd a kiválasztott projektet?",
+                on_accept=lambda: self.delete_selected_project(),
+                on_cancel=lambda: "pop"
+            ))
+            self.footer_updated = True
+
+        elif self.ctx.control.focus not in ("cards", "footer") and self.footer_updated:
+            self.footer.actions = [a for a in self.footer.actions if a["key"] != "d"]
+            self.footer_updated = False
+
+
+
+
+
+
+
+
+
 
         elif self.ctx.control.focus == "changelog":
             render_boxed(
@@ -158,7 +184,7 @@ class MainMenuView(BaseView):
         elif key in (10, 13, "\n"):
             return ProjectView(ctx = self.ctx, project=projects[self.card_idx])
         
-        elif key in (46, curses.KEY_DC):  # DEL gomb
+        elif key in (46, curses.KEY_DC):
             projects = self.ctx.data["projects"]
             if 0 <= self.card_idx < len(projects):
                 title = projects[self.card_idx].title
@@ -168,7 +194,8 @@ class MainMenuView(BaseView):
                     on_accept=lambda: self.delete_selected_project(),
                     on_cancel=lambda: "pop"
                 )
-
+        elif key in (9, '\t'):
+            self.ctx.control.focus = "footer"
         elif key == '' or key == 27:
             self.layout["middle"][1].erase()
             self.ctx.control.focus = "main"
@@ -218,4 +245,5 @@ class MainMenuView(BaseView):
 
         visible = max(1, self.layout["middle"][1].getmaxyx()[0] // (self.ctx.layout.project_card_height + self.ctx.layout.project_cards_spacing))
         self.scroll_offset = max(0, self.card_idx - visible + 1)
+        self.ctx.control.focus = "cards"
         return "pop"

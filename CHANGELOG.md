@@ -1,6 +1,6 @@
 # CMD.Flow Changelog
 
-## [v0.4.0] – 2025-05-27
+## [v0.4.0] – 2025-05-29
 
 ### Added
 - New modular folder structure: `core/`, `ui/`, `utils/`, `visuals/`
@@ -11,6 +11,7 @@
 - INFO panel with version/build display
 - Window size error screen with fallback behavior
 - Basic changelog panel and multi-view layout
+- Support for two languages
 
 ### Notes
 This is the first publicly usable version.
