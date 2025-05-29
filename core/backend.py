@@ -3,103 +3,103 @@ from datetime import date
 
 # --- Osztályok ---
 
-class Reszfeladat:
+class Subtask:
     _id_counter = 1
 
     def __init__(
         self,
-        nev: str,
-        kesz: bool = False,
+        title: str,
+        done: bool = False,
         id: int = None,
-        letrehozas_datum: str = None,
-        hatarido: str = "",
-        leiras: str = ""
+        creation_date: str = None,
+        deadline: str = "",
+        full_desc: str = ""
     ):
-        self.id = id or Reszfeladat._id_counter
-        Reszfeladat._id_counter = max(Reszfeladat._id_counter, self.id + 1)
-        self.nev = nev
-        self.kesz = kesz
+        self.id = id or Subtask._id_counter
+        Subtask._id_counter = max(Subtask._id_counter, self.id + 1)
+        self.title = title
+        self.done = done
 
         # New metadata fields
-        self.letrehozas_datum = letrehozas_datum or date.today().isoformat()
-        self.hatarido = hatarido
-        self.leiras = leiras
+        self.creation_date = creation_date or date.today().isoformat()
+        self.deadline = deadline
+        self.full_desc = full_desc
 
     def toggle(self):
-        self.kesz = not self.kesz
+        self.done = not self.done
 
     def to_dict(self):
         return {
             "id": self.id,
-            "nev": self.nev,
-            "kesz": self.kesz,
-            "letrehozas_datum": self.letrehozas_datum,
-            "hatarido": self.hatarido,
-            "leiras": self.leiras
+            "title": self.title,
+            "done": self.done,
+            "creation_date": self.creation_date,
+            "deadline": self.deadline,
+            "full_desc": self.full_desc
         }
 
     @classmethod
     def from_dict(cls, data):
         return cls(
-            nev=data["nev"],
-            kesz=data.get("kesz", False),
+            title=data["title"],
+            done=data.get("done", False),
             id=data.get("id"),
-            letrehozas_datum=data.get("letrehozas_datum", date.today().isoformat()),
-            hatarido=data.get("hatarido", ""),
-            leiras=data.get("leiras", "")
+            creation_date=data.get("creation_date", date.today().isoformat()),
+            deadline=data.get("deadline", ""),
+            full_desc=data.get("full_desc", "")
         )
 
 
-class Feladat:
+class Task:
     _id_counter = 1
 
-    def __init__(self, nev: str, id: int = None, letrehozas_datum: str = None, hatarido: str = "", leiras: str = ""):
-        self.id = id or Feladat._id_counter
-        Feladat._id_counter = max(Feladat._id_counter, self.id + 1)
-        self.nev = nev
-        self.reszfeladatok: list[Reszfeladat] = []
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = ""):
+        self.id = id or Task._id_counter
+        Task._id_counter = max(Task._id_counter, self.id + 1)
+        self.title = title
+        self.subtasks: list[Subtask] = []
 
         # New metadata fields
-        self.letrehozas_datum = letrehozas_datum or date.today().isoformat()
-        self.hatarido = hatarido
-        self.leiras = leiras
+        self.creation_date = creation_date or date.today().isoformat()
+        self.deadline = deadline
+        self.full_desc = full_desc
 
-    def add_reszfeladat(self, nev: str):
-        self.reszfeladatok.append(Reszfeladat(nev))
+    def add_subtask(self, title: str):
+        self.subtasks.append(Subtask(title))
 
     def progress(self) -> int:
-        if not self.reszfeladatok:
+        if not self.subtasks:
             return 0
-        keszek = sum(1 for r in self.reszfeladatok if r.kesz)
-        return int((keszek / len(self.reszfeladatok)) * 100)
+        doneek = sum(1 for r in self.subtasks if r.done)
+        return int((doneek / len(self.subtasks)) * 100)
 
-    def get_reszfeladat_by_id(self, id: int):
-        return next((r for r in self.reszfeladatok if r.id == id), None)
+    def get_subtask_by_id(self, id: int):
+        return next((r for r in self.subtasks if r.id == id), None)
 
     def to_dict(self):
         return {
             "id": self.id,
-            "nev": self.nev,
-            "letrehozas_datum": self.letrehozas_datum,
-            "hatarido": self.hatarido,
-            "leiras": self.leiras,
-            "reszfeladatok": [r.to_dict() for r in self.reszfeladatok]
+            "title": self.title,
+            "creation_date": self.creation_date,
+            "deadline": self.deadline,
+            "full_desc": self.full_desc,
+            "subtasks": [r.to_dict() for r in self.subtasks]
         }
 
-    def remove_reszfeladat(self, reszfeladat):
-        if reszfeladat in self.reszfeladatok:
-            self.reszfeladatok.remove(reszfeladat)
+    def remove_subtask(self, subtask):
+        if subtask in self.subtasks:
+            self.subtasks.remove(subtask)
 
     @classmethod
     def from_dict(cls, data):
         f = cls(
-            nev=data["nev"],
+            title=data["title"],
             id=data.get("id"),
-            letrehozas_datum=data.get("letrehozas_datum", date.today().isoformat()),
-            hatarido=data.get("hatarido", ""),
-            leiras=data.get("leiras", "")
+            creation_date=data.get("creation_date", date.today().isoformat()),
+            deadline=data.get("deadline", ""),
+            full_desc=data.get("full_desc", "")
         )
-        f.reszfeladatok = [Reszfeladat.from_dict(r) for r in data.get("reszfeladatok", [])]
+        f.subtasks = [Subtask.from_dict(r) for r in data.get("subtasks", [])]
         return f
 
 
@@ -107,124 +107,127 @@ class Feladat:
 
     @classmethod
     def from_dict(cls, data):
-        f = cls(data["nev"], data["id"])
-        f.reszfeladatok = [Reszfeladat.from_dict(r) for r in data["reszfeladatok"]]
+        f = cls(data["title"], data["id"])
+        f.subtasks = [Subtask.from_dict(r) for r in data["subtasks"]]
         return f
 
 
-class Fazis:
+class Phase:
     _id_counter = 1
 
-    def __init__(self, nev: str, id: int = None, letrehozas_datum: str = None, hatarido: str = "", leiras: str = ""):
-        self.id = id or Fazis._id_counter
-        Fazis._id_counter = max(Fazis._id_counter, self.id + 1)
-        self.nev = nev
-        self.feladatok: list[Feladat] = []
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = ""):
+        self.id = id or Phase._id_counter
+        Phase._id_counter = max(Phase._id_counter, self.id + 1)
+        self.title = title
+        self.tasks: list[Task] = []
 
         # New metadata fields
-        self.letrehozas_datum = letrehozas_datum or date.today().isoformat()
-        self.hatarido = hatarido
-        self.leiras = leiras
+        self.creation_date = creation_date or date.today().isoformat()
+        self.deadline = deadline
+        self.full_desc = full_desc
 
-    def add_feladat(self, nev: str):
-        self.feladatok.append(Feladat(nev))
+    def add_task(self, title: str):
+        self.tasks.append(Task(title))
 
     def progress(self) -> int:
-        if not self.feladatok:
+        if not self.tasks:
             return 0
-        return int(sum(f.progress() for f in self.feladatok) / len(self.feladatok))
+        return int(sum(f.progress() for f in self.tasks) / len(self.tasks))
 
-    def get_feladat_by_id(self, id: int):
-        return next((f for f in self.feladatok if f.id == id), None)
+    def get_task_by_id(self, id: int):
+        return next((f for f in self.tasks if f.id == id), None)
 
     def to_dict(self):
         return {
             "id": self.id,
-            "nev": self.nev,
-            "letrehozas_datum": self.letrehozas_datum,
-            "hatarido": self.hatarido,
-            "leiras": self.leiras,
-            "feladatok": [f.to_dict() for f in self.feladatok]
+            "title": self.title,
+            "creation_date": self.creation_date,
+            "deadline": self.deadline,
+            "full_desc": self.full_desc,
+            "tasks": [f.to_dict() for f in self.tasks]
         }
 
-    def remove_feladat(self, feladat):
-        if feladat in self.feladatok:
-            self.feladatok.remove(feladat)
+    def remove_task(self, task):
+        if task in self.tasks:
+            self.tasks.remove(task)
 
     @classmethod
     def from_dict(cls, data):
-        fazis = cls(
-            nev=data["nev"],
+        phase = cls(
+            title=data["title"],
             id=data.get("id"),
-            letrehozas_datum=data.get("letrehozas_datum", date.today().isoformat()),
-            hatarido=data.get("hatarido", ""),
-            leiras=data.get("leiras", "")
+            creation_date=data.get("creation_date", date.today().isoformat()),
+            deadline=data.get("deadline", ""),
+            full_desc=data.get("full_desc", "")
         )
-        fazis.feladatok = [Feladat.from_dict(f) for f in data.get("feladatok", [])]
-        return fazis
+        phase.tasks = [Task.from_dict(f) for f in data.get("tasks", [])]
+        return phase
 
 
-class Projekt:
+class Project:
     _id_counter = 1
 
-    def __init__(self, nev: str, id: int = None, letrehozas_datum: str = None, hatarido: str = "", leiras: str = "", priority: int = 1, status: bool = False):
-        self.id = id or Projekt._id_counter
-        Projekt._id_counter = max(Projekt._id_counter, self.id + 1)
-        self.nev = nev
-        self.fazisok: list[Fazis] = []
-        self.letrehozas_datum = letrehozas_datum or date.today().isoformat()
-        self.hatarido = hatarido  # Optional deadline (YYYY-MM-DD or empty)
-        self.leiras = leiras      # Optional description
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = "", priority: int = 1, status: bool = False):
+        self.id = id or Project._id_counter
+        Project._id_counter = max(Project._id_counter, self.id + 1)
+        self.title = title
+        self.phases: list[Phase] = []
+        self.creation_date = creation_date or date.today().isoformat()
+        self.deadline = deadline  # Optional deadline (YYYY-MM-DD or empty)
+        self.full_desc = full_desc      # Optional description
         self.priority = priority
         self.status = status
 
-    def add_fazis(self, nev: str):
-        self.fazisok.append(Fazis(nev))
+    def add_phase(self, title: str):
+        self.phases.append(Phase(title))
 
     def progress(self) -> int:
-        if not self.fazisok:
+        if not self.phases:
             return 0
-        return int(sum(f.progress() for f in self.fazisok) / len(self.fazisok))
+        return int(sum(f.progress() for f in self.phases) / len(self.phases))
 
-    def get_fazis_by_id(self, id: int):
-        return next((f for f in self.fazisok if f.id == id), None)
+    def get_phase_by_id(self, id: int):
+        return next((f for f in self.phases if f.id == id), None)
 
     def to_dict(self):
         return {
             "id": self.id,
-            "nev": self.nev,
-            "letrehozas_datum": self.letrehozas_datum,
-            "hatarido": self.hatarido,
-            "leiras": self.leiras,
-            "priotiry": self.priority,
-            "fazisok": [f.to_dict() for f in self.fazisok]
+            "title": self.title,
+            "creation_date": self.creation_date,
+            "deadline": self.deadline,
+            "full_desc": self.full_desc,
+            "priority": self.priority,
+            "phases": [f.to_dict() for f in self.phases],
+            "status": self.status
         }
 
     def is_empty(self):
-        return len(self.fazisok) == 0
+        return len(self.phases) == 0
 
-    def remove_fazis(self, fazis):
-        if fazis not in self.fazisok:
-            print("Fázis nem található.")
+    def remove_phase(self, phase):
+        if phase not in self.phases:
+            print("Phase not found.")
             return
 
-        if fazis.feladatok:
-            print(f"A fázis '{fazis.nev}' nem üres.")
+        if phase.tasks:
+            print(f"The phase '{phase.title}' isn't empty.")
             return
 
-        self.fazisok.remove(fazis)
+        self.phases.remove(phase)
 
     @classmethod
     def from_dict(cls, data):
-        projekt = cls(
-            nev=data["nev"],
+        project = cls(
+            title=data["title"],
             id=data.get("id"),
-            letrehozas_datum=data.get("letrehozas_datum", date.today().isoformat()),
-            hatarido=data.get("hatarido", ""),
-            leiras=data.get("leiras", "")
+            creation_date=data.get("creation_date", date.today().isoformat()),
+            deadline=data.get("deadline", ""),
+            full_desc=data.get("full_desc", ""),
+            priority=data.get("priority", ""),
+            status=data.get("status", "")
         )
-        projekt.fazisok = [Fazis.from_dict(f) for f in data.get("fazisok", [])]
-        return projekt
+        project.phases = [Phase.from_dict(f) for f in data.get("phases", [])]
+        return project
 
 
 
@@ -233,52 +236,52 @@ class Projekt:
 
 
 # --- Segédfüggvények ---
-def print_struktura(projektek: list[Projekt]):
-    for p in projektek:
-        print(f"Projekt: {p.nev} (#{p.id}) - {p.progress()}%")
-        for fazis in p.fazisok:
-            print(f"  Fázis: {fazis.nev} (#{fazis.id}) - {fazis.progress()}%")
-            for feladat in fazis.feladatok:
-                print(f"    Feladat: {feladat.nev} (#{feladat.id}) - {feladat.progress()}%")
-                for resz in feladat.reszfeladatok:
-                    status = "[x]" if resz.kesz else "[ ]"
-                    print(f"      {status} {resz.nev} (#{resz.id})")
+def print_structure(projects: list[Project]):
+    for p in projects:
+        print(f"Project: {p.title} (#{p.id}) - {p.progress()}%")
+        for phase in p.phases:
+            print(f"  Phase: {phase.title} (#{phase.id}) - {phase.progress()}%")
+            for task in phase.tasks:
+                print(f"    Task: {task.title} (#{task.id}) - {task.progress()}%")
+                for resz in task.subtasks:
+                    status = "[x]" if resz.done else "[ ]"
+                    print(f"      {status} {resz.title} (#{resz.id})")
 
-def remove_projekt_by_id(projektek: list[Projekt], id: int) -> list[Projekt]:
-    [p for p in projektek if p.id != id]
+def remove_project_by_id(projects: list[Project], id: int) -> list[Project]:
+    [p for p in projects if p.id != id]
 
 
 
 
 # --- Interaktív parancskezelés ---
-def toggle_reszfeladat_interaktiv(projektek):
+def toggle_subtask_interaktiv(projects):
     try:
-        pid = int(input("Projekt ID: "))
-        projekt = next((p for p in projektek if p.id == pid), None)
-        if not projekt:
-            print("Nincs ilyen projekt.")
+        pid = int(input("Project ID: "))
+        project = next((p for p in projects if p.id == pid), None)
+        if not project:
+            print("Nincs ilyen project.")
             return
 
         fazid = int(input("  Fázis ID: "))
-        fazis = projekt.get_fazis_by_id(fazid)
-        if not fazis:
+        phase = project.get_phase_by_id(fazid)
+        if not phase:
             print("  Nincs ilyen fázis.")
             return
 
-        fid = int(input("    Feladat ID: "))
-        feladat = fazis.get_feladat_by_id(fid)
-        if not feladat:
-            print("    Nincs ilyen feladat.")
+        fid = int(input("    Task ID: "))
+        task = phase.get_task_by_id(fid)
+        if not task:
+            print("    Nincs ilyen task.")
             return
 
-        rid = int(input("      Részfeladat ID: "))
-        resz = feladat.get_reszfeladat_by_id(rid)
+        rid = int(input("      Résztask ID: "))
+        resz = task.get_subtask_by_id(rid)
         if not resz:
-            print("      Nincs ilyen részfeladat.")
+            print("      Nincs ilyen résztask.")
             return
 
         resz.toggle()
-        print("      Részfeladat állapota megváltozott.")
+        print("      Résztask állapota megváltozott.")
     except ValueError:
         print("Hibás bemenet.")
 
@@ -286,7 +289,7 @@ def toggle_reszfeladat_interaktiv(projektek):
 # --- Main függvény ---
 
 def main():
-    projektek = load_projects_from_file()
+    projects = load_projects_from_file()
 
     while True:
         print("\n--- CMD.Flow ---")
@@ -295,15 +298,15 @@ def main():
 
         # --- Listázás ---
         if parancs == "list":
-            print_struktura(projektek)
+            print_structure(projects)
 
-        # --- Részfeladat kapcsolás ---
+        # --- Résztask kapcsolás ---
         elif parancs == "toggle":
-            toggle_reszfeladat_interaktiv(projektek)
+            toggle_subtask_interaktiv(projects)
 
         # --- Adatok mentése ---
         elif parancs == "save":
-            save_projects_to_file(projektek)
+            save_projects_to_file(projects)
             print("Mentve.")
         
         # --- Kilépés ---
@@ -320,50 +323,50 @@ def main():
 
             tipus = alparancs[1]
 
-            if tipus == "projekt":
-                nev = input("Projekt neve: ")
-                projektek.append(Projekt(nev))
+            if tipus == "project":
+                title = input("Project titlee: ")
+                projects.append(Project(title))
 
-            elif tipus == "fazis":
-                pid = int(input("Projekt ID: "))
-                projekt = next((p for p in projektek if p.id == pid), None)
-                if projekt:
-                    nev = input("Fázis neve: ")
-                    projekt.add_fazis(nev)
+            elif tipus == "phase":
+                pid = int(input("Project ID: "))
+                project = next((p for p in projects if p.id == pid), None)
+                if project:
+                    title = input("Fázis titlee: ")
+                    project.add_phase(title)
 
 
-            elif tipus == "feladat":
-                pid = int(input("Projekt ID: "))
-                projekt = next((p for p in projektek if p.id == pid), None)
-                if projekt:
+            elif tipus == "task":
+                pid = int(input("Project ID: "))
+                project = next((p for p in projects if p.id == pid), None)
+                if project:
                     fid = int(input("Fázis ID: "))
-                    fazis = projekt.get_fazis_by_id(fid)
-                    if fazis:
-                        nev = input("Feladat neve: ")
-                        fazis.add_feladat(nev)
+                    phase = project.get_phase_by_id(fid)
+                    if phase:
+                        title = input("Task titlee: ")
+                        phase.add_task(title)
                     else:
                         print("Nincs ilyen fázis.")
                 else:
-                    print("Nincs ilyen projekt.")
+                    print("Nincs ilyen project.")
 
-            elif tipus == "reszfeladat":
-                pid = int(input("Projekt ID: "))
-                projekt = next((p for p in projektek if p.id == pid), None)
-                if projekt:
+            elif tipus == "subtask":
+                pid = int(input("Project ID: "))
+                project = next((p for p in projects if p.id == pid), None)
+                if project:
                     fid = int(input("Fázis ID: "))
-                    fazis = projekt.get_fazis_by_id(fid)
-                    if fazis:
-                        felid = int(input("Feladat ID: "))
-                        feladat = fazis.get_feladat_by_id(felid)
-                        if feladat:
-                            nev = input("Részfeladat neve: ")
-                            feladat.add_reszfeladat(nev)
+                    phase = project.get_phase_by_id(fid)
+                    if phase:
+                        felid = int(input("Task ID: "))
+                        task = phase.get_task_by_id(felid)
+                        if task:
+                            title = input("Résztask titlee: ")
+                            task.add_subtask(title)
                         else:
-                            print("Nincs ilyen feladat.")
+                            print("Nincs ilyen task.")
                     else:
                         print("Nincs ilyen fázis.")
                 else:
-                    print("Nincs ilyen projekt.")
+                    print("Nincs ilyen project.")
 
             else:
                 print("Ismeretlen add-típus.")
@@ -377,49 +380,49 @@ def main():
 
             tipus = alparancs[1]
 
-            if tipus == "projekt":
-                pid = int(input("Projekt ID: "))
-                projekt = next((p for p in projektek if p.id == pid), None)
-                if projekt:
-                    if projekt.fazisok:
-                        valasz = input(f"A(z) '{projekt.nev}' projekt nem üres. Törlöd? (i/n): ").lower()
+            if tipus == "project":
+                pid = int(input("Project ID: "))
+                project = next((p for p in projects if p.id == pid), None)
+                if project:
+                    if project.phases:
+                        valasz = input(f"A(z) '{project.title}' project nem üres. Törlöd? (i/n): ").lower()
                         if valasz != "i":
                             print("Törlés megszakítva.")
                             continue
-                    projektek = [p for p in projektek if p.id != pid]
-                    print("Projekt törölve.")
+                    projects = [p for p in projects if p.id != pid]
+                    print("Project törölve.")
                 else:
-                    print("Nincs ilyen projekt.")
+                    print("Nincs ilyen project.")
 
-            elif tipus == "fazis":
-                pid = int(input("Projekt ID: "))
-                projekt = next((p for p in projektek if p.id == pid), None)
-                if projekt:
+            elif tipus == "phase":
+                pid = int(input("Project ID: "))
+                project = next((p for p in projects if p.id == pid), None)
+                if project:
                     fid = int(input("Fázis ID: "))
-                    projekt.remove_fazis_by_id(fid)
+                    project.remove_phase_by_id(fid)
 
-            elif tipus == "feladat":
-                pid = int(input("Projekt ID: "))
-                projekt = next((p for p in projektek if p.id == pid), None)
-                if projekt:
+            elif tipus == "task":
+                pid = int(input("Project ID: "))
+                project = next((p for p in projects if p.id == pid), None)
+                if project:
                     fazid = int(input("Fázis ID: "))
-                    fazis = projekt.get_fazis_by_id(fazid)
-                    if fazis:
-                        felid = int(input("Feladat ID: "))
-                        fazis.remove_feladat_by_id(felid)
+                    phase = project.get_phase_by_id(fazid)
+                    if phase:
+                        felid = int(input("Task ID: "))
+                        phase.remove_task_by_id(felid)
 
-            elif tipus == "reszfeladat":
-                pid = int(input("Projekt ID: "))
-                projekt = next((p for p in projektek if p.id == pid), None)
-                if projekt:
+            elif tipus == "subtask":
+                pid = int(input("Project ID: "))
+                project = next((p for p in projects if p.id == pid), None)
+                if project:
                     fazid = int(input("Fázis ID: "))
-                    fazis = projekt.get_fazis_by_id(fazid)
-                    if fazis:
-                        felid = int(input("Feladat ID: "))
-                        feladat = fazis.get_feladat_by_id(felid)
-                        if feladat:
-                            rid = int(input("Részfeladat ID: "))
-                            feladat.remove_reszfeladat_by_id(rid)
+                    phase = project.get_phase_by_id(fazid)
+                    if phase:
+                        felid = int(input("Task ID: "))
+                        task = phase.get_task_by_id(felid)
+                        if task:
+                            rid = int(input("Résztask ID: "))
+                            task.remove_subtask_by_id(rid)
 
             else:
                 print("Ismeretlen delete-típus.")

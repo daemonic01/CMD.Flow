@@ -29,7 +29,7 @@ class NewEntryFormView(BaseView):
             self.layout["middle"][0],
             self.values,
             row,
-            self.ctx.data["projektek"],
+            self.ctx.data["projects"],
             self.level,
             parent=self.parent,
             wait_ms=self.wait_ms
@@ -89,7 +89,7 @@ class NewEntryFormView(BaseView):
             self.layout["middle"][0],
             self.values,
             row,
-            self.ctx.data["projektek"],
+            self.ctx.data["projects"],
             self.level,
             parent=self.parent,
             wait_ms=self.wait_ms

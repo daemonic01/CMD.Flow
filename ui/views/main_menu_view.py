@@ -12,7 +12,9 @@ from ui.modules.project_cards import *
 from ui.views.window_size_error import draw_window_size_error
 from ui.views.new_entry_form import NewEntryFormView
 from ui.modules.changelog_panel import draw_changelog_panel
+from ui.views.project_view import ProjectView
 import json
+from utils.logger import log
 
 
 
@@ -35,7 +37,7 @@ class MainMenuView(BaseView):
         self.footer = FooterController()
         self.footer.add_action(t("footer.actions.exit"), "q", lambda: PopupConfirmView(
                     self.ctx,
-                    message=t("menu.exit_confirm"),
+                    message=t("footer.messages.exit_confirm"),
                     on_accept=lambda: "exit",
                     on_cancel=lambda: "pop"
                 ))
@@ -108,7 +110,7 @@ class MainMenuView(BaseView):
             if self.selected_idx == 0:
                 self.ctx.control.focus = "cards"
             elif self.selected_idx == 1:
-                return NewEntryFormView(self.ctx, level="projekt")
+                return NewEntryFormView(self.ctx, level="project")
             elif self.selected_idx == 2:
                 pass
             elif self.selected_idx == 3:
@@ -116,7 +118,7 @@ class MainMenuView(BaseView):
             elif self.selected_idx == 4:
                 return PopupConfirmView(
                     self.ctx,
-                    message=t("menu.exit_confirm"),
+                    message=t("footer.messages.exit_confirm"),
                     on_accept=lambda: exit(),
                     on_cancel=lambda: "pop"
                 )
@@ -133,8 +135,8 @@ class MainMenuView(BaseView):
         - 'scroll_offset' is adjusted when selection moves beyond the visible range.
         - Only the visible slice of projects is rendered based on 'scroll_offset'.
         """
-        projektek = self.ctx.data.get("projektek", [])
-        total = len(projektek)
+        projects = self.ctx.data.get("projects", [])
+        total = len(projects)
 
         rows, cols = self.layout["middle"][1].getmaxyx()
         card_height = self.ctx.layout.project_card_height
@@ -153,8 +155,20 @@ class MainMenuView(BaseView):
                 if self.card_idx >= self.scroll_offset + visible:
                     self.scroll_offset = max(0, self.card_idx - visible + 1)
 
-        elif key in (10, 13):
-            pass #return ProjectDetailsView(self.ctx, project=projektek[self.card_idx])
+        elif key in (10, 13, "\n"):
+            return ProjectView(ctx = self.ctx, project=projects[self.card_idx])
+        
+        elif key in (46, curses.KEY_DC):  # DEL gomb
+            projects = self.ctx.data["projects"]
+            if 0 <= self.card_idx < len(projects):
+                title = projects[self.card_idx].title
+                return PopupConfirmView(
+                    self.ctx,
+                    message=f"Törlöd a(z) „{title}” projektet?",
+                    on_accept=lambda: self.delete_selected_project(),
+                    on_cancel=lambda: "pop"
+                )
+
         elif key == '' or key == 27:
             self.layout["middle"][1].erase()
             self.ctx.control.focus = "main"
@@ -192,3 +206,16 @@ class MainMenuView(BaseView):
             self.changelog_scroll += 1
         elif key in (27, ''):
             self.ctx.control.focus = "main"
+
+
+    def delete_selected_project(self):
+        projects = self.ctx.data["projects"]
+        if 0 <= self.card_idx < len(projects):
+            projects.pop(self.card_idx)
+            from utils.data_io import save_projects_to_file
+            save_projects_to_file(projects)
+            self.card_idx = max(0, self.card_idx - 1)
+
+        visible = max(1, self.layout["middle"][1].getmaxyx()[0] // (self.ctx.layout.project_card_height + self.ctx.layout.project_cards_spacing))
+        self.scroll_offset = max(0, self.card_idx - visible + 1)
+        return "pop"

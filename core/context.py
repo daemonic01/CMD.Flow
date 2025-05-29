@@ -6,7 +6,7 @@ class UIState:
         self.footer = None
         self.messages = []
         self.screen = {"rows": 0, "cols": 0}
-        self.version = "v0.5.0"
+        self.version = "v0.4.0pre2"
         self.build = "N/A"
         self.logos = load_logo()
         self.compact = {
@@ -28,11 +28,11 @@ class ControlState:
 
 class SelectionState:
     def __init__(self):
-        self.level = "projekt"
+        self.level = "project"
         self.idx = 0
         self.selected_project = None
-        self.selected_fazis = None
-        self.selected_feladat = None
+        self.selected_phase = None
+        self.selected_task = None
 
 
 class LayoutConfig:
@@ -62,7 +62,7 @@ class AppConfig:
 class AppContext:
     def __init__(self):
         self.data = {
-            "projektek": load_projects_from_file()
+            "projects": load_projects_from_file()
         }
         self.selection = SelectionState()
         self.control = ControlState()

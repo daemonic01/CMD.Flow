@@ -2,7 +2,7 @@ import curses
 
 def draw_project_card(ctx, win, project, selected=False):
     try:
-        title = project.nev
+        title = project.title
         status = str(project.progress())+ "%"
         rows, cols = win.getmaxyx()
 
@@ -36,7 +36,7 @@ def draw_project_card(ctx, win, project, selected=False):
 
 def draw_project_cards_panel(win, ctx, selected_idx, scroll_offset, padding=1):
     try:
-        projektek = ctx.data.get("projektek", [])
+        projects = ctx.data.get("projects", [])
         rows, cols = win.getmaxyx()
         card_height = ctx.layout.project_card_height
         spacing = ctx.layout.project_cards_spacing
@@ -44,11 +44,11 @@ def draw_project_cards_panel(win, ctx, selected_idx, scroll_offset, padding=1):
 
         for i in range(visible):
             proj_idx = i + scroll_offset
-            if proj_idx >= len(projektek):
+            if proj_idx >= len(projects):
                 break
 
             y = i * (card_height + spacing) + padding
             card_win = win.derwin(card_height, cols - 2, y, 1)
-            draw_project_card(ctx, card_win, projektek[proj_idx], selected=(proj_idx == selected_idx))
+            draw_project_card(ctx, card_win, projects[proj_idx], selected=(proj_idx == selected_idx))
     except curses.error:
         pass

@@ -41,10 +41,15 @@ def main(stdscr):
         if isinstance(result, BaseView):
             view_stack.append(result)
         elif result == "pop":
+            stdscr.clear()
             view_stack.pop()
+        elif result == "back":
+            stdscr.clear()
+            view_stack.pop()
+            view_stack.pop()
+            ctx.control.focus = "main"
         elif result == "exit":
             break
-
 
 
 if __name__ == "__main__":

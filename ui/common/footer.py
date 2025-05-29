@@ -41,8 +41,6 @@ class FooterController:
 
 
     def draw(self, win, ctx):
-        win.erase()
-        win.box()
 
         # Súgósor
         win.attron(curses.color_pair(11))
@@ -58,4 +56,3 @@ class FooterController:
                 win.addstr(2, col, text, attr)
             col += len(text) + 2
 
-        win.refresh()

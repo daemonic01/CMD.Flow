@@ -32,7 +32,7 @@ class PopupConfirmView(BaseView):
                     option_str += f"[ {opt} ] "
                 else:
                     option_str += f"  {opt}   "
-            # center
+
             option_start_x = max(2, (width - len(option_str)) // 2)
             win.addstr(3, option_start_x, option_str)
         except curses.error:
@@ -47,14 +47,14 @@ class PopupConfirmView(BaseView):
             self.selected_idx = (self.selected_idx - 1) % len(self.options)
         elif key in (curses.KEY_RIGHT, curses.KEY_DOWN):
             self.selected_idx = (self.selected_idx + 1) % len(self.options)
-        elif key in [10, 13, "\n"]:  # ENTER
+        elif key in [10, 13, "\n"]:
             selected = self.options[self.selected_idx]
             if selected == "Igen" and self.on_accept:
                 return self.on_accept()
             elif selected == "Mégse" and self.on_cancel:
                 return self.on_cancel()
             return "pop"
-        elif key == '' or key == 27:  # ESC
+        elif key == '' or key == 27:
             if self.on_cancel:
                 return self.on_cancel()
             return "pop"

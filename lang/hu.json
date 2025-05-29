@@ -4,20 +4,17 @@
       "cards_title": "Projektek",
       "options": {
         "projects": "Projektkezelés",
-        "new_project": "Új projekt létrehozása",
+        "new_project": "Új project létrehozása",
         "settings": "Beállítások",
         "changelog": "Változásnapló",
         "exit": "Kilépés"
       },
       "changelog_title": "Változásnapló",
       "main_menu_info_box_title": "Információ",
-      "loaded_projects": "Betöltött projektek",
+      "loaded_projects": "Betöltött projects",
       "projects_done": "kész",
       "projects_in_progress": "folyamatban",
-      "next_deadline": "Következő határidő",
-
-
-      "exit_confirm": "Biztosan kilépsz?"
+      "next_deadline": "Következő határidő"
     },
     "main": {
       "header": "Projektkezelő",
@@ -25,6 +22,7 @@
       "breadcrumb": "Navigáció:",
       "delete_confirm": "Biztosan törlöd?"
     },
+
     "form": {
       "title": "Új {level} létrehozása",
       "fields": {
@@ -47,7 +45,12 @@
         "new": "Új elem",
         "delete": "Elem törlése",
         "menu": "Főmenü",
+        "back": "Vissza",
         "exit": "Kilépés"
+      },
+      "messages":{
+        "back": "Biztosan ki akarsz lépni a főmenübe?",
+        "exit_confirm": "Biztosan kilépsz?"
       },
       "info_panel": {
         "active_version": "Aktív verzió",
