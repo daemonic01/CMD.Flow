@@ -16,6 +16,7 @@ from utils.layout import update_screen_size
 
 def main(stdscr):
     stdscr.clear()
+    curses.start_color()
     stdscr.timeout(120)
     curses.curs_set(0)
     ctx = AppContext()

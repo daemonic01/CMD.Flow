@@ -21,6 +21,7 @@ class NewEntryFormView(BaseView):
         self.should_exit = False
         self.wait_ms = 2000
         self.edit_target = edit_target
+        self.ctx.control.focus = "entry_form"
 
         self.footer = FooterController()
         self.footer.add_action("Mentés", "s", self.save_and_exit)
@@ -38,6 +39,7 @@ class NewEntryFormView(BaseView):
             edit_target=self.edit_target
         )
         if result["status"] == "success" and result["exit"]:
+            self.ctx.control.focus = "cards"
             self.should_exit = True
 
     def render(self, stdscr):
@@ -81,12 +83,15 @@ class NewEntryFormView(BaseView):
             self.current_idx = (self.current_idx + 1) % len(self.fields)
         elif key in (curses.KEY_BACKSPACE, 127, 8) or key == '':
             self.values[self.current_idx] = self.values[self.current_idx][:-1]
+
         elif key in (9, '\t'):
+            self.ctx.control.last_focus = self.ctx.control.focus
             self.ctx.control.focus = "footer"
+
         elif key == '' or key == 27:
             curses.curs_set(0)
             return "pop"
-        elif key == curses.KEY_F10:
+        elif key  in (274, curses.KEY_F10):
              row = self.calculate_rendered_rows()
              result = save_entry_form(
             self.layout["middle"][0],

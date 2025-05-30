@@ -103,15 +103,6 @@ class Task:
         return f
 
 
-
-
-    @classmethod
-    def from_dict(cls, data):
-        f = cls(data["title"], data["id"])
-        f.subtasks = [Subtask.from_dict(r) for r in data["subtasks"]]
-        return f
-
-
 class Phase:
     _id_counter = 1
 

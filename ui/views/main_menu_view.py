@@ -1,4 +1,4 @@
-import curses
+import curses, json
 from ui.views.base_view import BaseView
 from ui.views.popup_confirm import PopupConfirmView
 from utils.localization import t
@@ -13,7 +13,6 @@ from ui.views.window_size_error import draw_window_size_error
 from ui.views.new_entry_form import NewEntryFormView
 from ui.modules.changelog_panel import draw_changelog_panel
 from ui.views.project_view import ProjectView
-import json
 from utils.logger import log
 
 
