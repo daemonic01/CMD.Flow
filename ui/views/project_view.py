@@ -25,6 +25,8 @@ class ProjectView(BaseView):
         self.project_title_figlet = generate_figlet(self.project.title)
         self.selected_idx = 0
         self.scroll_offset = 0
+        self.table_selected_row = 0
+        self.table_scroll_offset = 0
         self.items = []
         self.ctx.control.focus = "explorer" 
         
@@ -83,25 +85,100 @@ class ProjectView(BaseView):
         Routes key events to different input handlers depending on the UI focus:
         - 'footer': navigates and handles footer-specific commands
         """
+    def handle_input(self, key):
+
+        # ───────────── FOOTER ─────────────
         if self.ctx.control.focus == "footer":
+            if key == 27:  # ESC
+                self.ctx.control.focus = self.ctx.control.last_focus or "explorer"
             return self.footer.handle_navigation(key, self.layout["footer"], self.ctx)
 
-        if key == curses.KEY_UP:
-            if self.selected_idx > 0:
-                self.selected_idx -= 1
-                if self.selected_idx < self.scroll_offset:
-                    self.scroll_offset = self.selected_idx
+        # ───────────── PROJECT DETAILS ─────────────
+        if self.ctx.control.focus == "project_details":
+            children = get_children(self.items[self.selected_idx][0])
+            if key == curses.KEY_DOWN:
+                if self.table_selected_row < len(children) - 1:
+                    self.table_selected_row += 1
+                    max_visible = self.layout["middle"][1].getmaxyx()[0] - 8
+                    if self.table_selected_row >= self.table_scroll_offset + max_visible:
+                        self.table_scroll_offset = self.table_selected_row - max_visible + 1
 
-        elif key == curses.KEY_DOWN:
-            if self.selected_idx < len(self.items) - 1:
-                self.selected_idx += 1
-                max_visible = self.layout["middle"][0].getmaxyx()[0] - 2  # header + bottom padding
-                if self.selected_idx >= self.scroll_offset + max_visible:
-                    self.scroll_offset = max(0, self.selected_idx - max_visible + 1)
-        elif key in (10, 13, "\n"):
-            pass
-        elif key in (9, '\t'):
-            self.ctx.control.focus = "footer"
+            elif key == curses.KEY_UP:
+                if self.table_selected_row > 0:
+                    self.table_selected_row -= 1
+                    if self.table_selected_row < self.table_scroll_offset:
+                        self.table_scroll_offset = self.table_selected_row
+
+            elif key in (10, 13, "\n"):
+                parent = self.items[self.selected_idx][0]
+                children = get_children(parent)
+
+                if not children and hasattr(parent, "toggle"):
+                    parent.toggle()
+                    from utils.data_io import save_projects_to_file
+                    save_projects_to_file(self.ctx.data["projects"])
+                    return
+
+
+                if not children or self.table_selected_row >= len(children):
+                    return
+
+                selected_child = children[self.table_selected_row]
+
+
+                if not get_children(selected_child):
+                    selected_child.toggle()
+                    from utils.data_io import save_projects_to_file
+                    save_projects_to_file(self.ctx.data["projects"])
+                else:
+
+                    for idx, (obj, _) in enumerate(self.items):
+                        if obj == selected_child:
+                            self.selected_idx = idx
+                            max_visible = self.layout["middle"][0].getmaxyx()[0] - 2
+                            if self.selected_idx >= self.scroll_offset + max_visible:
+                                self.scroll_offset = self.selected_idx - max_visible + 1
+                            elif self.selected_idx < self.scroll_offset:
+                                self.scroll_offset = self.selected_idx
+                            break
+
+
+            elif key == '' or key == 27:
+                self.ctx.control.focus = "explorer"
+
+            elif key in (9, '\t'):
+                self.ctx.control.last_focus = "project_details"
+                self.ctx.control.focus = "footer"
+
+            return
+
+        # ───────────── EXPLORER ─────────────
+        if self.ctx.control.focus == "explorer":
+            if key == curses.KEY_DOWN:
+                if self.selected_idx < len(self.items) - 1:
+                    self.selected_idx += 1
+                    max_visible = self.layout["middle"][0].getmaxyx()[0] - 2
+                    if self.selected_idx >= self.scroll_offset + max_visible:
+                        self.scroll_offset = self.selected_idx - max_visible + 1
+
+            elif key == curses.KEY_UP:
+                if self.selected_idx > 0:
+                    self.selected_idx -= 1
+                    if self.selected_idx < self.scroll_offset:
+                        self.scroll_offset = self.selected_idx
+
+            elif key in (10, 13, "\n"):
+                self.ctx.control.focus = "project_details"
+                self.table_selected_row = 0
+                self.table_scroll_offset = 0
+
+            elif key in (9, '\t'):
+                self.ctx.control.last_focus = "explorer"
+                self.ctx.control.focus = "footer"
+
+            return
+
+
 
 
     def draw_explorer_panel(self, win):
@@ -156,21 +233,20 @@ class ProjectView(BaseView):
 
 
     def draw_details_panel(self, win):
-        self.ctx.control.focus = "project_details"
         max_y, max_x = win.getmaxyx()
         pad_x = 2
         row = 1
 
-        selected = self.items[self.selected_idx][0]  # kiválasztott objektum
+        #self.ctx.control.focus = "project_details"
 
-        # Fejléc — név
+        selected = self.items[self.selected_idx][0]
+
         try:
             win.addstr(row, pad_x, f"Név: {selected.title}", curses.A_BOLD)
             row += 2
         except curses.error:
             pass
 
-        # Leírás
         if getattr(selected, "full_desc", ""):
             desc = selected.full_desc.strip()
             wrapped = textwrap.wrap(desc, max_x - pad_x * 2)
@@ -182,34 +258,75 @@ class ProjectView(BaseView):
                 row += 1
             row += 1
 
-        # Határidő
         if getattr(selected, "deadline", ""):
             win.addstr(row, pad_x, f"Határidő: {selected.deadline}")
-            row += 3
+            row += 2
 
-        # Alárendelt elemek — ha vannak
+        # Táblázat
         children = get_children(selected)
         if children:
-            row += 1
+            self.draw_details_table(win, children, start_row=row)
 
-            for child in children:
-                if row >= max_y - 1: break
-                status = ""
-                if hasattr(child, "done"):
-                    status = "  [x]  " if child.done else "  [ ]  "
-                    tab_header = "| Státusz |        Név        |  Határidő  | Leírás                                   |"
-                    win.addstr(row, pad_x, f"| {status} | {child.title.ljust(17)} | {child.deadline} | {child.full_desc[:40]} |")
-                else:
-                    tab_header = "|        Név        |  Határidő  | Leírás                                   |"
-                    win.addstr(row, pad_x, f"| {child.title.ljust(17)} | {child.deadline} | {child.full_desc[:40]} |")
 
-                try:
-                    row += 1
-                except curses.error:
-                    pass
-            
-            win.addstr(row-(len(children)+2), pad_x, tab_header, curses.A_UNDERLINE)
-            sep_line = "|"+"-"*(len(tab_header)-2)+"|"
-            win.addstr(row-(len(children)+1), pad_x, sep_line)
+        # A fő információk és children rajzolása után
+        if not children and hasattr(selected, "toggle"):  # csak részfeladatnál
+            box_height = 3
+            box_width = 30
+            max_y, max_x = win.getmaxyx()
+            box_y = max_y - box_height - 1
+            box_x = max_x - box_width - 2
+
+            try:
+                box_win = win.derwin(box_height, box_width, box_y, box_x)
+                box_win.box()
+                cols = box_win.getmaxyx()[1]
+
+                status = "[ KÉSZ ]" if selected.done else "[ NINCS KÉSZ ]"
+                box_win.addstr(1, ((cols - len(status)-8)//2), f"Állapot: {status}")
+                box_win.refresh()
+            except curses.error:
+                pass
+
 
         win.refresh()
+
+
+
+
+
+
+    def draw_details_table(self, win, children, start_row):
+        max_y, max_x = win.getmaxyx()
+        pad_x = 2
+        visible_rows = max_y - start_row - 2
+        table_rows = children[self.table_scroll_offset:self.table_scroll_offset + visible_rows]
+
+        # Fejléc
+        header = "| Státusz |        Név        |  Határidő  | Leírás                                   |"
+        sep_line = "|" + "-" * (len(header) - 2) + "|"
+
+        try:
+            win.addstr(start_row, pad_x, header, curses.A_UNDERLINE)
+            win.addstr(start_row + 1, pad_x, sep_line)
+        except curses.error:
+            pass
+
+        for i, child in enumerate(table_rows):
+            row = start_row + 2 + i
+            if row >= max_y - 1:
+                break
+
+            status = "[x]" if getattr(child, "done", False) else "[ ]"
+            title = child.title[:17].ljust(17)
+            deadline = getattr(child, "deadline", "—")[:10].ljust(10)
+            desc = getattr(child, "full_desc", "")[:40].ljust(40)
+
+            line = f"|   {status}   | {title} | {deadline} | {desc} |"
+            try:
+                if self.table_scroll_offset + i == self.table_selected_row:
+                    win.addstr(row, pad_x, line, curses.A_REVERSE)
+                else:
+                    win.addstr(row, pad_x, line)
+            except curses.error:
+                pass
+
