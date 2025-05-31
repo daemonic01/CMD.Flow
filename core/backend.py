@@ -13,7 +13,9 @@ class Subtask:
         id: int = None,
         creation_date: str = None,
         deadline: str = "",
-        full_desc: str = ""
+        full_desc: str = "",
+        priority: int = 1
+        
     ):
         self.id = id or Subtask._id_counter
         Subtask._id_counter = max(Subtask._id_counter, self.id + 1)
@@ -24,6 +26,7 @@ class Subtask:
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
         self.full_desc = full_desc
+        self.priority = priority
 
     def toggle(self):
         self.done = not self.done
@@ -35,7 +38,8 @@ class Subtask:
             "done": self.done,
             "creation_date": self.creation_date,
             "deadline": self.deadline,
-            "full_desc": self.full_desc
+            "full_desc": self.full_desc,
+            "priority": self.priority
         }
 
     @classmethod
@@ -46,14 +50,15 @@ class Subtask:
             id=data.get("id"),
             creation_date=data.get("creation_date", date.today().isoformat()),
             deadline=data.get("deadline", ""),
-            full_desc=data.get("full_desc", "")
+            full_desc=data.get("full_desc", ""),
+            priority=data.get("priority", "")
         )
 
 
 class Task:
     _id_counter = 1
 
-    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = ""):
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = "", priority: int = 1):
         self.id = id or Task._id_counter
         Task._id_counter = max(Task._id_counter, self.id + 1)
         self.title = title
@@ -63,6 +68,7 @@ class Task:
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
         self.full_desc = full_desc
+        self.priority = priority
 
     def add_subtask(self, title: str):
         self.subtasks.append(Subtask(title))
@@ -83,6 +89,7 @@ class Task:
             "creation_date": self.creation_date,
             "deadline": self.deadline,
             "full_desc": self.full_desc,
+            "priority": self.priority,
             "subtasks": [r.to_dict() for r in self.subtasks]
         }
 
@@ -97,7 +104,8 @@ class Task:
             id=data.get("id"),
             creation_date=data.get("creation_date", date.today().isoformat()),
             deadline=data.get("deadline", ""),
-            full_desc=data.get("full_desc", "")
+            full_desc=data.get("full_desc", ""),
+            priority=data.get("priority", "")
         )
         f.subtasks = [Subtask.from_dict(r) for r in data.get("subtasks", [])]
         return f
@@ -106,7 +114,7 @@ class Task:
 class Phase:
     _id_counter = 1
 
-    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = ""):
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = "", priority: int = 1):
         self.id = id or Phase._id_counter
         Phase._id_counter = max(Phase._id_counter, self.id + 1)
         self.title = title
@@ -116,6 +124,7 @@ class Phase:
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
         self.full_desc = full_desc
+        self.priority = priority
 
     def add_task(self, title: str):
         self.tasks.append(Task(title))
@@ -135,6 +144,7 @@ class Phase:
             "creation_date": self.creation_date,
             "deadline": self.deadline,
             "full_desc": self.full_desc,
+            "priority": self.priority,
             "tasks": [f.to_dict() for f in self.tasks]
         }
 
@@ -149,7 +159,8 @@ class Phase:
             id=data.get("id"),
             creation_date=data.get("creation_date", date.today().isoformat()),
             deadline=data.get("deadline", ""),
-            full_desc=data.get("full_desc", "")
+            full_desc=data.get("full_desc", ""),
+            priority=data.get("priority", "")
         )
         phase.tasks = [Task.from_dict(f) for f in data.get("tasks", [])]
         return phase

@@ -23,6 +23,7 @@ class NewEntryFormView(BaseView):
         self.edit_target = edit_target
         self.ctx.control.focus = "entry_form"
 
+
         self.footer = FooterController()
         self.footer.add_action("Mentés", "s", self.save_and_exit)
 
@@ -39,7 +40,7 @@ class NewEntryFormView(BaseView):
             edit_target=self.edit_target
         )
         if result["status"] == "success" and result["exit"]:
-            self.ctx.control.focus = "cards"
+            self.ctx.control.focus = self.ctx.control.last_focus
             self.should_exit = True
 
     def render(self, stdscr):
@@ -67,7 +68,8 @@ class NewEntryFormView(BaseView):
 
         stdscr.refresh()
         curses.curs_set(1)
-        render_boxed(self.layout["footer"], lambda w: self.footer.draw(w, self.ctx))
+        render_boxed(self.layout["footer"], lambda w: self.footer.draw(w, self.ctx),
+            border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "footer" else None)
 
 
 
@@ -85,7 +87,6 @@ class NewEntryFormView(BaseView):
             self.values[self.current_idx] = self.values[self.current_idx][:-1]
 
         elif key in (9, '\t'):
-            self.ctx.control.last_focus = self.ctx.control.focus
             self.ctx.control.focus = "footer"
 
         elif key == '' or key == 27:
@@ -100,9 +101,11 @@ class NewEntryFormView(BaseView):
             self.ctx.data["projects"],
             self.level,
             parent=self.parent,
-            wait_ms=self.wait_ms
+            wait_ms=self.wait_ms,
+            edit_target=self.edit_target
         )
              if result["status"] == "success" and result["exit"]:
+                self.ctx.control.focus = self.ctx.control.last_focus
                 self.should_exit = True
 
         elif isinstance(key, str) and len(key) == 1:

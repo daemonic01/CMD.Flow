@@ -6,7 +6,7 @@ class UIState:
         self.footer = None
         self.messages = []
         self.screen = {"rows": 0, "cols": 0}
-        self.version = "v0.4.0pre2"
+        self.version = "v0.4.0-pre7"
         self.build = "N/A"
         self.logos = load_logo()
         self.compact = {
@@ -45,6 +45,7 @@ class LayoutConfig:
         self.middle_split = [0.5, 0.5]
         self.project_card_height = 8
         self.project_cards_spacing = 1
+        self.selected_panel_border = ["|", "|", "-", "-", "+", "+", "+", "+"]
 
         self.layout_profiles = {
             "menu": {"min_rows": 30, "min_cols": 90},

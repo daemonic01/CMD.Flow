@@ -1,4 +1,5 @@
 import curses, textwrap
+from core.backend import Project, Phase, Task, Subtask
 from ui.views.base_view import BaseView
 from ui.views.popup_confirm import PopupConfirmView
 from utils.localization import t
@@ -9,7 +10,8 @@ from ui.modules.project_cards import *
 from ui.views.window_size_error import draw_window_size_error
 from ui.modules.project_header import draw_header
 from utils.figlet import generate_figlet
-from utils.hierarchy import flatten_project_hierarchy, get_children
+from utils.hierarchy import flatten_project_hierarchy, get_children, get_parent
+from ui.views.new_entry_form import NewEntryFormView
 
 from utils.logger import log
 
@@ -27,6 +29,7 @@ class ProjectView(BaseView):
         self.scroll_offset = 0
         self.table_selected_row = 0
         self.table_scroll_offset = 0
+        self.footer_updated = False
         self.items = []
         self.ctx.control.focus = "explorer" 
         
@@ -55,28 +58,56 @@ class ProjectView(BaseView):
         self.items = flatten_project_hierarchy(self.project)
         self.ctx.control.mode = "project_view"
         self.ctx.ui.footer = self.footer
+        self.selected_item = self.items[self.selected_idx][0]
+        self.selected_children = get_children(self.selected_item)
+
+
         stdscr.refresh()
 
         
         render_boxed(self.layout["header"], draw_content_fn= lambda w: draw_header(w, self.project_title_figlet, self.project.title))
 
+        
+
 
         render_boxed(
             self.layout["middle"][0],
             draw_content_fn=self.draw_explorer_panel,
-            title="Projektstruktúra"
+            title="» Projektstruktúra" if self.ctx.control.focus == "explorer" else "Projektstruktúra",
+            border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "explorer" else None
         )
 
 
         render_boxed(
             self.layout["middle"][1],
             draw_content_fn=self.draw_details_panel,
-            title="Részletek"
+            title="» Részletek" if self.ctx.control.focus == "project_details" else "Részletek",
+            border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "project_details" else None
         )
 
+        if self.ctx.control.focus == "project_details":
+            self.realign_table_scroll()
 
-        render_boxed(self.layout["footer"], lambda w: self.footer.draw(w, self.ctx))
+        
 
+
+        if (self.ctx.control.focus == "project_details" and not self.footer_updated):
+
+            self.footer.add_action_once("Új", "n", lambda: self.open_add_form())
+            self.footer.add_action_once("Szerkesztés", "e", self.open_edit_form)
+            self.footer.add_action_once("Törlés", "d", lambda: self.open_delete_confirm())
+
+            self.footer_updated = True
+
+        elif self.ctx.control.focus not in ("project_details", "footer") and self.footer_updated:
+            self.footer.actions = [a for a in self.footer.actions if a["key"] not in ("d", "e", "n")]
+            self.footer_updated = False
+
+
+
+
+        render_boxed(self.layout["footer"], lambda w: self.footer.draw(w, self.ctx),
+            border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "footer" else None)
 
     def handle_input(self, key):
         """
@@ -85,7 +116,6 @@ class ProjectView(BaseView):
         Routes key events to different input handlers depending on the UI focus:
         - 'footer': navigates and handles footer-specific commands
         """
-    def handle_input(self, key):
 
         # ───────────── FOOTER ─────────────
         if self.ctx.control.focus == "footer":
@@ -96,10 +126,11 @@ class ProjectView(BaseView):
         # ───────────── PROJECT DETAILS ─────────────
         if self.ctx.control.focus == "project_details":
             children = get_children(self.items[self.selected_idx][0])
+
             if key == curses.KEY_DOWN:
                 if self.table_selected_row < len(children) - 1:
                     self.table_selected_row += 1
-                    max_visible = self.layout["middle"][1].getmaxyx()[0] - 8
+                    max_visible = self.layout["middle"][1].getmaxyx()[0] - 12
                     if self.table_selected_row >= self.table_scroll_offset + max_visible:
                         self.table_scroll_offset = self.table_selected_row - max_visible + 1
 
@@ -113,25 +144,18 @@ class ProjectView(BaseView):
                 parent = self.items[self.selected_idx][0]
                 children = get_children(parent)
 
-                if not children and hasattr(parent, "toggle"):
-                    parent.toggle()
-                    from utils.data_io import save_projects_to_file
-                    save_projects_to_file(self.ctx.data["projects"])
+                if isinstance(parent, Subtask):
+                    self.toggle_and_save(parent)
                     return
-
 
                 if not children or self.table_selected_row >= len(children):
                     return
 
                 selected_child = children[self.table_selected_row]
 
-
-                if not get_children(selected_child):
-                    selected_child.toggle()
-                    from utils.data_io import save_projects_to_file
-                    save_projects_to_file(self.ctx.data["projects"])
+                if isinstance(selected_child, Subtask):
+                    self.toggle_and_save(selected_child)
                 else:
-
                     for idx, (obj, _) in enumerate(self.items):
                         if obj == selected_child:
                             self.selected_idx = idx
@@ -147,12 +171,13 @@ class ProjectView(BaseView):
                 self.ctx.control.focus = "explorer"
 
             elif key in (9, '\t'):
-                self.ctx.control.last_focus = "project_details"
+                self.ctx.control.last_focus = self.ctx.control.focus
                 self.ctx.control.focus = "footer"
 
             return
 
         # ───────────── EXPLORER ─────────────
+        
         if self.ctx.control.focus == "explorer":
             if key == curses.KEY_DOWN:
                 if self.selected_idx < len(self.items) - 1:
@@ -168,12 +193,13 @@ class ProjectView(BaseView):
                         self.scroll_offset = self.selected_idx
 
             elif key in (10, 13, "\n"):
+                self.ctx.control.last_focus = self.ctx.control.focus
                 self.ctx.control.focus = "project_details"
                 self.table_selected_row = 0
                 self.table_scroll_offset = 0
 
             elif key in (9, '\t'):
-                self.ctx.control.last_focus = "explorer"
+                self.ctx.control.last_focus = self.ctx.control.focus
                 self.ctx.control.focus = "footer"
 
             return
@@ -237,9 +263,9 @@ class ProjectView(BaseView):
         pad_x = 2
         row = 1
 
-        #self.ctx.control.focus = "project_details"
-
-        selected = self.items[self.selected_idx][0]
+        #selected = self.items[self.selected_idx][0]
+        selected = self.selected_item
+        children = self.selected_children
 
         try:
             win.addstr(row, pad_x, f"Név: {selected.title}", curses.A_BOLD)
@@ -263,13 +289,13 @@ class ProjectView(BaseView):
             row += 2
 
         # Táblázat
-        children = get_children(selected)
+        #children = get_children(selected)
         if children:
             self.draw_details_table(win, children, start_row=row)
 
 
         # A fő információk és children rajzolása után
-        if not children and hasattr(selected, "toggle"):  # csak részfeladatnál
+        elif hasattr(selected, "toggle"):  # csak részfeladatnál
             box_height = 3
             box_width = 30
             max_y, max_x = win.getmaxyx()
@@ -287,8 +313,7 @@ class ProjectView(BaseView):
             except curses.error:
                 pass
 
-
-        win.refresh()
+        
 
 
 
@@ -329,4 +354,145 @@ class ProjectView(BaseView):
                     win.addstr(row, pad_x, line)
             except curses.error:
                 pass
+        
+    def realign_table_scroll(self):
+        children = get_children(self.items[self.selected_idx][0])
+        max_visible = self.layout["middle"][1].getmaxyx()[0] - 12  # vagy számítsd pontosan
 
+        if self.table_selected_row >= self.table_scroll_offset + max_visible:
+            self.table_scroll_offset = self.table_selected_row - max_visible + 1
+        elif self.table_selected_row < self.table_scroll_offset:
+            self.table_scroll_offset = self.table_selected_row
+        elif len(children) - self.table_scroll_offset < max_visible:
+            self.table_scroll_offset = max(0, len(children) - max_visible)
+
+
+    def open_add_form(self, level=None, parent=None):
+        if level is None or parent is None:
+            if not (0 <= self.selected_idx < len(self.items)):
+                return "pop"
+            selected = self.items[self.selected_idx][0]
+            level, parent = self.get_add_target_info(selected)
+            if level is None:
+                return "pop"
+
+        return NewEntryFormView(
+            ctx=self.ctx,
+            level=level,
+            parent=parent,
+            initial_values=["", "", "", ""],
+            edit_target=None
+        )
+
+
+
+    def open_edit_form(self):
+        if not (0 <= self.selected_idx < len(self.items)):
+            return "pop"
+
+        from core.backend import Project, Phase, Task, Subtask
+
+        obj = self.items[self.selected_idx][0]
+        projects = self.ctx.data["projects"]
+
+        # Meghatározzuk a szintet
+        if isinstance(obj, Project):
+            level = "project"
+            parent = None
+        elif isinstance(obj, Phase):
+            level = "phase"
+            parent = get_parent(obj, projects)
+        elif isinstance(obj, Task):
+            level = "task"
+            parent = get_parent(obj, projects)
+        elif isinstance(obj, Subtask):
+            level = "subtask"
+            parent = get_parent(obj, projects)
+        else:
+            return "pop"
+
+        # Mezők előkészítése
+        values = [
+            obj.title or "",
+            getattr(obj, "full_desc", "") or "",
+            getattr(obj, "deadline", "") or "",
+            str(getattr(obj, "priority", 1))
+        ]
+
+        return NewEntryFormView(
+            ctx=self.ctx,
+            level=level,
+            initial_values=values,
+            parent=parent,
+            edit_target=obj
+        )
+
+    
+
+
+    def open_delete_confirm(self):
+        target = self.items[self.selected_idx][0]
+        title = getattr(target, "title", "Ismeretlen elem")
+
+        def on_accept():
+            self.delete_selected_element()
+            self.ctx.control.focus = "explorer"
+            return "pop"
+
+        return PopupConfirmView(
+            ctx=self.ctx,
+            message=f"Törlöd ezt az elemet?\n\n→ {title}",
+            on_accept=on_accept,
+            on_cancel=lambda: "pop"
+        )
+
+
+
+
+    def delete_selected_element(self):
+        all_projects = self.ctx.data["projects"]
+        target = self.items[self.selected_idx][0]
+
+        from core.backend import Project, Phase, Task, Subtask
+
+        # Projekt törlése
+        if isinstance(target, Project):
+            all_projects.remove(target)
+
+        else:
+            parent = get_parent(target, all_projects)
+
+            if isinstance(target, Phase) and hasattr(parent, "phases"):
+                parent.phases.remove(target)
+
+            elif isinstance(target, Task) and hasattr(parent, "tasks"):
+                parent.tasks.remove(target)
+
+            elif isinstance(target, Subtask) and hasattr(parent, "subtasks"):
+                parent.subtasks.remove(target)
+
+        # Mentés fájlba
+        from utils.data_io import save_projects_to_file
+        save_projects_to_file(all_projects)
+
+        # UI frissítés
+        self.selected_idx = max(0, self.selected_idx - 1)
+        self.scroll_offset = max(0, min(self.scroll_offset, self.selected_idx))
+
+
+    def get_add_target_info(self, selected):
+        from core.backend import Project, Phase, Task
+        if isinstance(selected, Project):
+            return "phase", selected
+        elif isinstance(selected, Phase):
+            return "task", selected
+        elif isinstance(selected, Task):
+            return "subtask", selected
+        else:
+            return None, None  # Subtask után már nincs újabb szint
+
+    
+    def toggle_and_save(self, obj):
+        obj.toggle()
+        from utils.data_io import save_projects_to_file
+        save_projects_to_file(self.ctx.data["projects"])

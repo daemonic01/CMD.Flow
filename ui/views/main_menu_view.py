@@ -72,8 +72,7 @@ class MainMenuView(BaseView):
             )
 
 
-
-        if (self.ctx.control.focus == "footer" and self.ctx.control.last_focus == "cards" and not self.footer_updated):
+        if (self.ctx.control.focus == "cards" and not self.footer_updated):
 
             self.footer.add_action_once("Törlés", "d", lambda: PopupConfirmView(
             self.ctx,
@@ -112,7 +111,8 @@ class MainMenuView(BaseView):
             )
 
         render_boxed(self.layout["middle"][2], draw_content_fn=lambda w: draw_menu_info_box(w, self.ctx), title=t("menu.main_menu_info_box_title"))
-        render_boxed(self.layout["footer"], lambda w: self.footer.draw(w, self.ctx))
+        render_boxed(self.layout["footer"], lambda w: self.footer.draw(w, self.ctx),
+            border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "footer" else None)
 
 
     def handle_input(self, key):

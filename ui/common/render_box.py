@@ -10,7 +10,7 @@ def render_boxed(
     **kwargs
 ):
     try:
-        win.erase()
+
 
         if border:
             if border_chars and len(border_chars) == 8:

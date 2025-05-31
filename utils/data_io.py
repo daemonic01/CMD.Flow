@@ -49,24 +49,23 @@ def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2
         "priority": values[3]
     }
 
-    from core.backend import Project, Phase, Task, Subtask
-    if level == "project":
-        log("PROJEKT LEVEL: TRUE")
-        if edit_target:
-            log("EDIT TARGET: TRUE")
-            edit_target.title = entry_data["title"]
-            edit_target.full_desc = entry_data["full_desc"]
-            edit_target.deadline = entry_data["deadline"]
-            edit_target.priority = entry_data.get("priority", 1)
 
-        else:
+    from core.backend import Project, Phase, Task, Subtask
+    if edit_target:
+        edit_target.title = entry_data["title"]
+        edit_target.full_desc = entry_data["full_desc"]
+        edit_target.deadline = entry_data["deadline"]
+        edit_target.priority = entry_data.get("priority", 1)
+
+    else:
+        if level == "project":
             projects.append(Project(**entry_data))
-    elif level == "phase" and parent:
-        parent.phases.append(Phase(**entry_data))
-    elif level == "task" and parent:
-        parent.tasks.append(Task(**entry_data))
-    elif level == "subtask" and parent:
-        parent.subtasks.append(Subtask(**entry_data))
+        elif level == "phase" and parent:
+            parent.phases.append(Phase(**entry_data))
+        elif level == "task" and parent:
+            parent.tasks.append(Task(**entry_data))
+        elif level == "subtask" and parent:
+            parent.subtasks.append(Subtask(**entry_data))
 
     save_projects_to_file(projects)
     stdscr.addstr(row + 2, 4, "Mentés sikeres.", curses.A_BOLD)
