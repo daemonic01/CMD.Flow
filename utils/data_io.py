@@ -35,7 +35,7 @@ def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2
         curses.napms(wait_ms)
         return {"status": "error", "exit": False}
 
-    deadline = values[2].strip()
+    deadline = values[3].strip()
     if deadline and not is_valid_date(deadline):
         stdscr.addstr(row + 2, 4, "Hibás formátum (YYYY-MM-DD) vagy múltbéli dátumot adtál meg!", curses.A_BOLD)
         stdscr.refresh()
@@ -44,15 +44,17 @@ def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2
 
     entry_data = {
         "title": title,
-        "full_desc": values[1].strip(),
+        "short_desc": values[1].strip(),
+        "full_desc": values[2].strip(),
         "deadline": deadline,
-        "priority": values[3]
+        "priority": values[4]
     }
 
 
     from core.backend import Project, Phase, Task, Subtask
     if edit_target:
         edit_target.title = entry_data["title"]
+        edit_target.short_desc = entry_data["short_desc"]
         edit_target.full_desc = entry_data["full_desc"]
         edit_target.deadline = entry_data["deadline"]
         edit_target.priority = entry_data.get("priority", 1)
@@ -67,6 +69,8 @@ def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2
         elif level == "subtask" and parent:
             parent.subtasks.append(Subtask(**entry_data))
 
+    from core.backend import update_completion_status
+    update_completion_status(projects)
     save_projects_to_file(projects)
     stdscr.addstr(row + 2, 4, "Mentés sikeres.", curses.A_BOLD)
     stdscr.refresh()

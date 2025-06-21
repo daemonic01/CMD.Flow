@@ -1,5 +1,6 @@
 import curses, textwrap
 from core.backend import Project, Phase, Task, Subtask
+from core.backend import update_completion_status
 from ui.views.base_view import BaseView
 from ui.views.popup_confirm import PopupConfirmView
 from utils.localization import t
@@ -55,7 +56,7 @@ class ProjectView(BaseView):
             draw_window_size_error(stdscr)
             return
         
-        self.items = flatten_project_hierarchy(self.project)
+        self.items = [(self.project, -1)] + flatten_project_hierarchy(self.project)
         self.ctx.control.mode = "project_view"
         self.ctx.ui.footer = self.footer
         self.selected_item = self.items[self.selected_idx][0]
@@ -92,10 +93,13 @@ class ProjectView(BaseView):
 
 
         if (self.ctx.control.focus == "project_details" and not self.footer_updated):
-
-            self.footer.add_action_once("Új", "n", lambda: self.open_add_form())
+            selected = self.items[self.selected_idx][0]
+            level, parent = self.get_add_target_info(selected)
+            if level:  # csak akkor adjunk hozzá gombot, ha van hova
+                self.footer.add_action_once("Új", "n", lambda: self.open_add_form(level, parent))
             self.footer.add_action_once("Szerkesztés", "e", self.open_edit_form)
-            self.footer.add_action_once("Törlés", "d", lambda: self.open_delete_confirm())
+            if not isinstance(selected, Project):
+                self.footer.add_action_once("Törlés", "d", lambda: self.open_delete_confirm())
 
             self.footer_updated = True
 
@@ -225,9 +229,10 @@ class ProjectView(BaseView):
 
         def get_color_for_depth(depth):
             return {
-                0: curses.color_pair(1),
-                1: curses.color_pair(2),
-                2: curses.color_pair(3)
+                -1: curses.color_pair(1),  # Projekt szint
+                0: curses.color_pair(2),
+                1: curses.color_pair(3),
+                2: curses.color_pair(4),
             }.get(depth, curses.color_pair(4))
 
 
@@ -344,7 +349,7 @@ class ProjectView(BaseView):
             status = "[x]" if getattr(child, "done", False) else "[ ]"
             title = child.title[:17].ljust(17)
             deadline = getattr(child, "deadline", "—")[:10].ljust(10)
-            desc = getattr(child, "full_desc", "")[:40].ljust(40)
+            desc = getattr(child, "short_desc", "")[:40].ljust(40)
 
             line = f"|   {status}   | {title} | {deadline} | {desc} |"
             try:
@@ -368,11 +373,11 @@ class ProjectView(BaseView):
 
 
     def open_add_form(self, level=None, parent=None):
+        selected = self.items[self.selected_idx][0]
+        level, parent = self.get_add_target_info(selected)
         if level is None or parent is None:
             if not (0 <= self.selected_idx < len(self.items)):
                 return "pop"
-            selected = self.items[self.selected_idx][0]
-            level, parent = self.get_add_target_info(selected)
             if level is None:
                 return "pop"
 
@@ -380,7 +385,7 @@ class ProjectView(BaseView):
             ctx=self.ctx,
             level=level,
             parent=parent,
-            initial_values=["", "", "", ""],
+            initial_values=["", "", "", "", ""],
             edit_target=None
         )
 
@@ -414,6 +419,7 @@ class ProjectView(BaseView):
         # Mezők előkészítése
         values = [
             obj.title or "",
+            getattr(obj, "short_desc", "") or "",
             getattr(obj, "full_desc", "") or "",
             getattr(obj, "deadline", "") or "",
             str(getattr(obj, "priority", 1))
@@ -495,4 +501,5 @@ class ProjectView(BaseView):
     def toggle_and_save(self, obj):
         obj.toggle()
         from utils.data_io import save_projects_to_file
+        update_completion_status(self.ctx.data["projects"])
         save_projects_to_file(self.ctx.data["projects"])

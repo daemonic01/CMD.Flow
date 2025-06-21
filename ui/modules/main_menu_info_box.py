@@ -1,5 +1,6 @@
 import curses
 import datetime
+from utils.stats import count_done_projects
 from utils.localization import t
 
 def draw_menu_info_box(win, ctx, padding=1):
@@ -17,11 +18,13 @@ def draw_menu_info_box(win, ctx, padding=1):
 
         rows, cols = win.getmaxyx()
 
+        done, not_done = count_done_projects(ctx.data["projects"])
+
         win.addstr(2, (cols-len(date_str))//2, date_str, curses.A_BOLD)
         win.addstr(3, (cols-len(time_str))//2, time_str, curses.A_NORMAL)
         win.hline(5, 1, "-", cols-2)
         win.addstr(6, 3, f"{t("menu.loaded_projects")}: {len(ctx.data["projects"])}")
-        win.addstr(7, 3, f"0 {t("menu.projects_done")} | 5 {t("menu.projects_in_progress")}")
+        win.addstr(7, 3, f"{done} {t("menu.projects_done")} | {not_done} {t("menu.projects_in_progress")}")
         win.hline(8, 1, "-", cols-2)
         deadline_text = f"{t("menu.next_deadline")}: 2025.06.27"
         win.addstr(10, max((cols - len(deadline_text)) // 2, 0), deadline_text)

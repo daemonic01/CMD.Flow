@@ -13,6 +13,7 @@ class Subtask:
         id: int = None,
         creation_date: str = None,
         deadline: str = "",
+        short_desc: str = "",
         full_desc: str = "",
         priority: int = 1
         
@@ -25,6 +26,7 @@ class Subtask:
         # New metadata fields
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
+        self.short_desc = short_desc
         self.full_desc = full_desc
         self.priority = priority
 
@@ -38,6 +40,7 @@ class Subtask:
             "done": self.done,
             "creation_date": self.creation_date,
             "deadline": self.deadline,
+            "short_desc": self.short_desc,
             "full_desc": self.full_desc,
             "priority": self.priority
         }
@@ -50,6 +53,7 @@ class Subtask:
             id=data.get("id"),
             creation_date=data.get("creation_date", date.today().isoformat()),
             deadline=data.get("deadline", ""),
+            short_desc=data.get("short_desc", ""),
             full_desc=data.get("full_desc", ""),
             priority=data.get("priority", "")
         )
@@ -58,7 +62,7 @@ class Subtask:
 class Task:
     _id_counter = 1
 
-    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = "", priority: int = 1):
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", short_desc: str = "", full_desc: str = "", priority: int = 1, is_done: bool = False):
         self.id = id or Task._id_counter
         Task._id_counter = max(Task._id_counter, self.id + 1)
         self.title = title
@@ -67,8 +71,10 @@ class Task:
         # New metadata fields
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
+        self.short_desc = short_desc
         self.full_desc = full_desc
         self.priority = priority
+        self.is_done = is_done
 
     def add_subtask(self, title: str):
         self.subtasks.append(Subtask(title))
@@ -88,8 +94,10 @@ class Task:
             "title": self.title,
             "creation_date": self.creation_date,
             "deadline": self.deadline,
+            "short_desc": self.short_desc,
             "full_desc": self.full_desc,
             "priority": self.priority,
+            "is_done": self.is_done,
             "subtasks": [r.to_dict() for r in self.subtasks]
         }
 
@@ -104,8 +112,10 @@ class Task:
             id=data.get("id"),
             creation_date=data.get("creation_date", date.today().isoformat()),
             deadline=data.get("deadline", ""),
+            short_desc=data.get("short_desc", ""),
             full_desc=data.get("full_desc", ""),
-            priority=data.get("priority", "")
+            priority=data.get("priority", ""),
+            is_done = data.get("is_done", False)
         )
         f.subtasks = [Subtask.from_dict(r) for r in data.get("subtasks", [])]
         return f
@@ -114,7 +124,7 @@ class Task:
 class Phase:
     _id_counter = 1
 
-    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = "", priority: int = 1):
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", short_desc: str = "", full_desc: str = "", priority: int = 1, is_done: bool = False):
         self.id = id or Phase._id_counter
         Phase._id_counter = max(Phase._id_counter, self.id + 1)
         self.title = title
@@ -123,8 +133,10 @@ class Phase:
         # New metadata fields
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
+        self.short_desc = short_desc
         self.full_desc = full_desc
         self.priority = priority
+        self.is_done = is_done
 
     def add_task(self, title: str):
         self.tasks.append(Task(title))
@@ -143,8 +155,10 @@ class Phase:
             "title": self.title,
             "creation_date": self.creation_date,
             "deadline": self.deadline,
+            "short_desc": self.short_desc,
             "full_desc": self.full_desc,
             "priority": self.priority,
+            "is_done": self.is_done,
             "tasks": [f.to_dict() for f in self.tasks]
         }
 
@@ -159,8 +173,10 @@ class Phase:
             id=data.get("id"),
             creation_date=data.get("creation_date", date.today().isoformat()),
             deadline=data.get("deadline", ""),
+            short_desc=data.get("short_desc", ""),
             full_desc=data.get("full_desc", ""),
-            priority=data.get("priority", "")
+            priority=data.get("priority", ""),
+            is_done = data.get("is_done", False)
         )
         phase.tasks = [Task.from_dict(f) for f in data.get("tasks", [])]
         return phase
@@ -169,16 +185,18 @@ class Phase:
 class Project:
     _id_counter = 1
 
-    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", full_desc: str = "", priority: int = 1, status: bool = False):
+    def __init__(self, title: str, id: int = None, creation_date: str = None, deadline: str = "", short_desc: str = "", full_desc: str = "", priority: int = 1, status: bool = False, is_done: bool = False):
         self.id = id or Project._id_counter
         Project._id_counter = max(Project._id_counter, self.id + 1)
         self.title = title
         self.phases: list[Phase] = []
         self.creation_date = creation_date or date.today().isoformat()
-        self.deadline = deadline  # Optional deadline (YYYY-MM-DD or empty)
-        self.full_desc = full_desc      # Optional description
+        self.deadline = deadline
+        self.short_desc = short_desc
+        self.full_desc = full_desc
         self.priority = priority
         self.status = status
+        self.is_done = is_done
 
     def add_phase(self, title: str):
         self.phases.append(Phase(title))
@@ -197,8 +215,10 @@ class Project:
             "title": self.title,
             "creation_date": self.creation_date,
             "deadline": self.deadline,
+            "short_desc": self.short_desc,
             "full_desc": self.full_desc,
             "priority": self.priority,
+            "is_done": self.is_done,
             "phases": [f.to_dict() for f in self.phases],
             "status": self.status
         }
@@ -224,214 +244,25 @@ class Project:
             id=data.get("id"),
             creation_date=data.get("creation_date", date.today().isoformat()),
             deadline=data.get("deadline", ""),
+            short_desc=data.get("short_desc", ""),
             full_desc=data.get("full_desc", ""),
             priority=data.get("priority", ""),
-            status=data.get("status", "")
+            status=data.get("status", ""),
+            is_done = data.get("is_done", False)
         )
         project.phases = [Phase.from_dict(f) for f in data.get("phases", [])]
         return project
+    
 
 
 
-
-
-
-
-# --- Segédfüggvények ---
-def print_structure(projects: list[Project]):
-    for p in projects:
-        print(f"Project: {p.title} (#{p.id}) - {p.progress()}%")
-        for phase in p.phases:
-            print(f"  Phase: {phase.title} (#{phase.id}) - {phase.progress()}%")
+def update_completion_status(projects):
+    for project in projects:
+        for phase in project.phases:
             for task in phase.tasks:
-                print(f"    Task: {task.title} (#{task.id}) - {task.progress()}%")
-                for resz in task.subtasks:
-                    status = "[x]" if resz.done else "[ ]"
-                    print(f"      {status} {resz.title} (#{resz.id})")
-
-def remove_project_by_id(projects: list[Project], id: int) -> list[Project]:
-    [p for p in projects if p.id != id]
+                task.is_done = all(subtask.done for subtask in task.subtasks)
+            phase.is_done = all(task.is_done for task in phase.tasks)
+        project.is_done = all(phase.is_done for phase in project.phases)
 
 
 
-
-# --- Interaktív parancskezelés ---
-def toggle_subtask_interaktiv(projects):
-    try:
-        pid = int(input("Project ID: "))
-        project = next((p for p in projects if p.id == pid), None)
-        if not project:
-            print("Nincs ilyen project.")
-            return
-
-        fazid = int(input("  Fázis ID: "))
-        phase = project.get_phase_by_id(fazid)
-        if not phase:
-            print("  Nincs ilyen fázis.")
-            return
-
-        fid = int(input("    Task ID: "))
-        task = phase.get_task_by_id(fid)
-        if not task:
-            print("    Nincs ilyen task.")
-            return
-
-        rid = int(input("      Résztask ID: "))
-        resz = task.get_subtask_by_id(rid)
-        if not resz:
-            print("      Nincs ilyen résztask.")
-            return
-
-        resz.toggle()
-        print("      Résztask állapota megváltozott.")
-    except ValueError:
-        print("Hibás bemenet.")
-
-
-# --- Main függvény ---
-
-def main():
-    projects = load_projects_from_file()
-
-    while True:
-        print("\n--- CMD.Flow ---")
-        print("Parancsok: add | list | delete | toggle | save | exit")
-        parancs = input(">>> ").strip().lower()
-
-        # --- Listázás ---
-        if parancs == "list":
-            print_structure(projects)
-
-        # --- Résztask kapcsolás ---
-        elif parancs == "toggle":
-            toggle_subtask_interaktiv(projects)
-
-        # --- Adatok mentése ---
-        elif parancs == "save":
-            save_projects_to_file(projects)
-            print("Mentve.")
-        
-        # --- Kilépés ---
-        elif parancs == "exit":
-            print("Kilépés...")
-            break
-
-        # --- Új egység hozzáadása ---
-        elif parancs.startswith("add"):
-            alparancs = parancs.split()
-            if len(alparancs) < 2:
-                print("Pontosan add mit?")
-                continue
-
-            tipus = alparancs[1]
-
-            if tipus == "project":
-                title = input("Project titlee: ")
-                projects.append(Project(title))
-
-            elif tipus == "phase":
-                pid = int(input("Project ID: "))
-                project = next((p for p in projects if p.id == pid), None)
-                if project:
-                    title = input("Fázis titlee: ")
-                    project.add_phase(title)
-
-
-            elif tipus == "task":
-                pid = int(input("Project ID: "))
-                project = next((p for p in projects if p.id == pid), None)
-                if project:
-                    fid = int(input("Fázis ID: "))
-                    phase = project.get_phase_by_id(fid)
-                    if phase:
-                        title = input("Task titlee: ")
-                        phase.add_task(title)
-                    else:
-                        print("Nincs ilyen fázis.")
-                else:
-                    print("Nincs ilyen project.")
-
-            elif tipus == "subtask":
-                pid = int(input("Project ID: "))
-                project = next((p for p in projects if p.id == pid), None)
-                if project:
-                    fid = int(input("Fázis ID: "))
-                    phase = project.get_phase_by_id(fid)
-                    if phase:
-                        felid = int(input("Task ID: "))
-                        task = phase.get_task_by_id(felid)
-                        if task:
-                            title = input("Résztask titlee: ")
-                            task.add_subtask(title)
-                        else:
-                            print("Nincs ilyen task.")
-                    else:
-                        print("Nincs ilyen fázis.")
-                else:
-                    print("Nincs ilyen project.")
-
-            else:
-                print("Ismeretlen add-típus.")
-
-        # --- Egység törlése ---
-        elif parancs.startswith("delete"):
-            alparancs = parancs.split()
-            if len(alparancs) < 2:
-                print("Pontosan delete mit?")
-                continue
-
-            tipus = alparancs[1]
-
-            if tipus == "project":
-                pid = int(input("Project ID: "))
-                project = next((p for p in projects if p.id == pid), None)
-                if project:
-                    if project.phases:
-                        valasz = input(f"A(z) '{project.title}' project nem üres. Törlöd? (i/n): ").lower()
-                        if valasz != "i":
-                            print("Törlés megszakítva.")
-                            continue
-                    projects = [p for p in projects if p.id != pid]
-                    print("Project törölve.")
-                else:
-                    print("Nincs ilyen project.")
-
-            elif tipus == "phase":
-                pid = int(input("Project ID: "))
-                project = next((p for p in projects if p.id == pid), None)
-                if project:
-                    fid = int(input("Fázis ID: "))
-                    project.remove_phase_by_id(fid)
-
-            elif tipus == "task":
-                pid = int(input("Project ID: "))
-                project = next((p for p in projects if p.id == pid), None)
-                if project:
-                    fazid = int(input("Fázis ID: "))
-                    phase = project.get_phase_by_id(fazid)
-                    if phase:
-                        felid = int(input("Task ID: "))
-                        phase.remove_task_by_id(felid)
-
-            elif tipus == "subtask":
-                pid = int(input("Project ID: "))
-                project = next((p for p in projects if p.id == pid), None)
-                if project:
-                    fazid = int(input("Fázis ID: "))
-                    phase = project.get_phase_by_id(fazid)
-                    if phase:
-                        felid = int(input("Task ID: "))
-                        task = phase.get_task_by_id(felid)
-                        if task:
-                            rid = int(input("Résztask ID: "))
-                            task.remove_subtask_by_id(rid)
-
-            else:
-                print("Ismeretlen delete-típus.")
-
-        else:
-            print("Ismeretlen parancs.")
-
-
-if __name__ == "__main__":
-    main()

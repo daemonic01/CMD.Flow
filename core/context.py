@@ -47,6 +47,14 @@ class LayoutConfig:
         self.project_cards_spacing = 1
         self.selected_panel_border = ["|", "|", "-", "-", "+", "+", "+", "+"]
 
+        self.field_max_lengths = {
+            "title": 50,
+            "short_desc": 80,
+            "full_desc": 400,
+            "deadline": 10,
+            "priority": 1
+        }
+
         self.layout_profiles = {
             "menu": {"min_rows": 30, "min_cols": 90},
             "main": {"min_rows": 25, "min_cols": 80},

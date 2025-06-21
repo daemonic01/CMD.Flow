@@ -21,6 +21,7 @@ class MainMenuView(BaseView):
     def __init__(self, ctx):
         super().__init__(ctx)
         self.last_focus = ctx.control.last_focus
+        self.ctx.control.focus = "menu"
         self.selected_idx = 0
         self.card_idx = 0
         self.scroll_offset = 0
@@ -61,7 +62,8 @@ class MainMenuView(BaseView):
         self.layout = compute_layout(self.ctx)
 
         render_boxed(self.layout["header"], draw_content_fn=lambda w: draw_logo(w, self.ctx))
-        render_boxed(self.layout["middle"][0], draw_content_fn=lambda w: draw_main_menu(w, self.menu_items, self.selected_idx), title=t("menu.title"))
+        render_boxed(self.layout["middle"][0], draw_content_fn=lambda w: draw_main_menu(w, self.menu_items, self.selected_idx), title=t("menu.title"),
+                     border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "menu" else None)
         
         if self.ctx.control.focus == "cards":
             render_boxed(

@@ -15,8 +15,9 @@ class NewEntryFormView(BaseView):
         super().__init__(ctx)
         self.level = level
         self.parent = parent
-        self.fields = ["Név", "Leírás", "Határidő (YYYY-MM-DD)", "Prioritás"]
-        self.values = initial_values or ["", "", "", ""]
+        self.fields = ["Név", "Rövid leírás", "Leírás", "Határidő (YYYY-MM-DD)", "Prioritás"]
+        self.max_lengths = list(ctx.layout.field_max_lengths.values())
+        self.values = initial_values or ["", "", "", "", ""]
         self.current_idx = 0
         self.should_exit = False
         self.wait_ms = 2000
@@ -90,8 +91,10 @@ class NewEntryFormView(BaseView):
             self.ctx.control.focus = "footer"
 
         elif key == '' or key == 27:
+            self.ctx.control.focus = self.ctx.control.last_focus
             curses.curs_set(0)
             return "pop"
+        
         elif key  in (274, curses.KEY_F10):
              row = self.calculate_rendered_rows()
              result = save_entry_form(
@@ -109,7 +112,8 @@ class NewEntryFormView(BaseView):
                 self.should_exit = True
 
         elif isinstance(key, str) and len(key) == 1:
-            if len(self.values[self.current_idx]) < 500:
+            max_len = self.max_lengths[self.current_idx] if self.current_idx < len(self.max_lengths) else 100
+            if len(self.values[self.current_idx]) < max_len:
                 self.values[self.current_idx] += key
 
 
