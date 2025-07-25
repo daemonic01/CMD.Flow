@@ -14,8 +14,6 @@ from utils.figlet import generate_figlet
 from utils.hierarchy import flatten_project_hierarchy, get_children, get_parent
 from ui.views.new_entry_form import NewEntryFormView
 
-from utils.logger import log
-
 
 
 
@@ -74,7 +72,7 @@ class ProjectView(BaseView):
         render_boxed(
             self.layout["middle"][0],
             draw_content_fn=self.draw_explorer_panel,
-            title="» Projektstruktúra" if self.ctx.control.focus == "explorer" else "Projektstruktúra",
+            title="» Pruject Structure" if self.ctx.control.focus == "explorer" else "Pruject Structure",
             border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "explorer" else None
         )
 
@@ -82,7 +80,7 @@ class ProjectView(BaseView):
         render_boxed(
             self.layout["middle"][1],
             draw_content_fn=self.draw_details_panel,
-            title="» Részletek" if self.ctx.control.focus == "project_details" else "Részletek",
+            title="» Details" if self.ctx.control.focus == "project_details" else "Details",
             border_chars= self.ctx.layout.selected_panel_border if self.ctx.control.focus == "project_details" else None
         )
 
@@ -96,10 +94,10 @@ class ProjectView(BaseView):
             selected = self.items[self.selected_idx][0]
             level, parent = self.get_add_target_info(selected)
             if level:
-                self.footer.add_action_once("Új", "n", lambda: self.open_add_form(level, parent))
-            self.footer.add_action_once("Szerkesztés", "e", self.open_edit_form)
+                self.footer.add_action_once("New", "n", lambda: self.open_add_form(level, parent))
+            self.footer.add_action_once("Edit", "e", self.open_edit_form)
             if not isinstance(selected, Project):
-                self.footer.add_action_once("Törlés", "d", lambda: self.open_delete_confirm())
+                self.footer.add_action_once("Delete", "d", lambda: self.open_delete_confirm())
 
             self.footer_updated = True
 
@@ -145,11 +143,9 @@ class ProjectView(BaseView):
                         self.table_scroll_offset = self.table_selected_row
 
             elif key in (curses.KEY_BACKSPACE, 127, 8, "\b"):
-                log("BACKSPACE PRESSED!!")
                 selected = self.items[self.selected_idx][0]
                 parent = get_parent(selected, self.ctx.data["projects"])
                 if parent:
-                    log("PARENT TRUE!!")
                     for idx, (obj, _) in enumerate(self.items):
                         if obj == parent:
                             self.selected_idx = idx
@@ -284,8 +280,6 @@ class ProjectView(BaseView):
         max_y, max_x = win.getmaxyx()
         pad_x = 2
         row = 1
-
-        #selected = self.items[self.selected_idx][0]
         selected = self.selected_item
         children = self.selected_children
 
@@ -298,7 +292,7 @@ class ProjectView(BaseView):
         if getattr(selected, "full_desc", ""):
             desc = selected.full_desc.strip()
             wrapped = textwrap.wrap(desc, max_x - pad_x * 2)
-            win.addstr(row, pad_x, "Leírás:")
+            win.addstr(row, pad_x, "Description:")
             row += 1
             for line in wrapped:
                 if row >= max_y - 2: break
@@ -307,17 +301,14 @@ class ProjectView(BaseView):
             row += 1
 
         if getattr(selected, "deadline", ""):
-            win.addstr(row, pad_x, f"Határidő: {selected.deadline}")
+            win.addstr(row, pad_x, f"Deadline: {selected.deadline}")
             row += 2
 
-        # Táblázat
-        #children = get_children(selected)
         if children:
             self.draw_details_table(win, children, start_row=row)
 
 
-        # A fő információk és children rajzolása után
-        elif hasattr(selected, "toggle"):  # csak részfeladatnál
+        elif hasattr(selected, "toggle"):
             box_height = 3
             box_width = 30
             max_y, max_x = win.getmaxyx()
@@ -329,8 +320,8 @@ class ProjectView(BaseView):
                 box_win.box()
                 cols = box_win.getmaxyx()[1]
 
-                status = "[ KÉSZ ]" if selected.done else "[ NINCS KÉSZ ]"
-                box_win.addstr(1, ((cols - len(status)-8)//2), f"Állapot: {status}")
+                status = "[ READY ]" if selected.done else "[ NOT READY ]"
+                box_win.addstr(1, ((cols - len(status)-8)//2), f"Status: {status}")
                 box_win.refresh()
             except curses.error:
                 pass

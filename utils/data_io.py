@@ -3,7 +3,7 @@ import os
 from typing import TYPE_CHECKING
 import curses
 from utils.date_utils import is_valid_date
-from utils.logger import log
+from utils.localization import t
 
 
 if TYPE_CHECKING:
@@ -30,14 +30,14 @@ def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2
 
     title = values[0].strip()
     if not title:
-        stdscr.addstr(row + 2, 4, "A név megadása kötelező!", curses.A_BOLD)
+        stdscr.addstr(row + 2, 4, t("errors.missing_name"), curses.A_BOLD)
         stdscr.refresh()
         curses.napms(wait_ms)
         return {"status": "error", "exit": False}
 
     deadline = values[3].strip()
     if deadline and not is_valid_date(deadline):
-        stdscr.addstr(row + 2, 4, "Hibás formátum (YYYY-MM-DD) vagy múltbéli dátumot adtál meg!", curses.A_BOLD)
+        stdscr.addstr(row + 2, 4, t("errors.invalid_date"), curses.A_BOLD)
         stdscr.refresh()
         curses.napms(wait_ms)
         return {"status": "error", "exit": False}
@@ -72,7 +72,7 @@ def save_entry_form(stdscr, values, row, projects, level, parent=None, wait_ms=2
     from core.backend import update_completion_status
     update_completion_status(projects)
     save_projects_to_file(projects)
-    stdscr.addstr(row + 2, 4, "Mentés sikeres.", curses.A_BOLD)
+    stdscr.addstr(row + 2, 4, "Saved successfully.", curses.A_BOLD)
     stdscr.refresh()
     curses.napms(wait_ms)
 

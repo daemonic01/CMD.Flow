@@ -1,7 +1,7 @@
 
 import json
 
-with open("lang/hu.json", encoding="utf-8") as f:
+with open("lang/en.json", encoding="utf-8") as f:
     _translations = json.load(f)
 
 def t(key: str, **kwargs):
@@ -14,4 +14,4 @@ def t(key: str, **kwargs):
             return value.format(**kwargs)
         return value
     except (KeyError, TypeError):
-        return key  # fallback
+        return key

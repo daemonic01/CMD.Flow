@@ -1,0 +1,80 @@
+{
+    "menu": {
+      "title": "Main menu",
+      "cards_title": "Projects",
+      "options": {
+        "projects": "Manage projects",
+        "new_project": "Create new project",
+        "demodata": "Generate DemoData",
+        "changelog": "Changelog",
+        "exit": "Exit"
+      },
+      "changelog_title": "Changelog",
+      "main_menu_info_box_title": "Information",
+      "loaded_projects": "Loaded projects",
+      "projects_done": "done",
+      "projects_in_progress": "in progress",
+      "next_deadline": "Next deadline"
+    },
+    "main": {
+      "header": "Project manager",
+      "no_projects": "You don't have a project yet.",
+      "breadcrumb": "Navigation:",
+      "delete_confirm": "Are you sure you want to delete it?"
+    },
+
+    "form": {
+      "title": "Creating new {level}",
+      "edit_title": "Editing entry",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "deadline": "Deadline (YYYY-MM-DD)"
+      },
+      "errors": {
+        "missing_name": "Name is required!",
+        "invalid_date": "Incorrect format or past date!"
+      },
+      "messages": {
+        "saved": "Saved successfully.",
+        "cancelled": "Creation aborted."
+      }
+    },
+    "footer": {
+      "actions": {
+        "save": "Save",
+        "new": "New entry",
+        "delete": "Delete entry",
+        "menu": "Main Menu",
+        "back": "Back",
+        "exit": "Exit"
+      },
+      "messages":{
+        "back": "Are you sure you want to exit to the main menu?",
+        "exit_confirm": "Are you sure you quit?"
+      },
+      "info_panel": {
+        "active_version": "Active version",
+        "build": "Build"
+      }
+    },
+    "error": {
+      "unknown": "Unknown error."
+    },
+
+    "week": {
+      "Monday": "Monday",
+      "Tuesday": "Tuesday",
+      "Wednesday": "Wednesday",
+      "Thursday": "Thursday",
+      "Friday": "Friday",
+      "Saturday": "Saturday",
+      "Sunday": "Sunday"
+  },
+
+    "errors": {
+      "window_size_error_message_1": "The program does not currently support this window size.",
+      "window_size_error_message_2": "To continue, increase the size of the window."
+  }
+}
+  

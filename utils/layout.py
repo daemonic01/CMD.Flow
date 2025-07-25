@@ -4,26 +4,14 @@ from utils.logger import log
 
 def update_screen_size(ctx):
     curses.update_lines_cols()
-    old_rows =  ctx.ui.screen["rows"] #ctx["ui"]["screen"]["rows"]
-    old_cols = ctx.ui.screen["cols"] #ctx["ui"]["screen"]["cols"]
+    old_rows =  ctx.ui.screen["rows"]
+    old_cols = ctx.ui.screen["cols"]
 
     rows, cols = curses.LINES, curses.COLS
-    #rows, cols = ctx["ui"]["stdscr"].getmaxyx()
     ctx.ui.screen["rows"] = rows
     ctx.ui.screen["cols"] = cols
-    ctx.control.screen_changed = (old_rows != rows or old_cols != cols)    # ctx["control"]["screen_changed"]
-
-    # Frissítsük a compact módokat nézetenként
-    """
-    for view, limits in ctx.get("layout_profiles", {}).items():
-        r = ctx["ui"]["screen"]["rows"]
-        c = ctx["ui"]["screen"]["cols"]
-        ctx["ui"]["compact"][view] = (r < limits["min_rows"] or c < limits["min_cols"])
-    """
- 
+    ctx.control.screen_changed = (old_rows != rows or old_cols != cols)
     ctx.control.layout_blocked = rows < 30 or cols < 105
-
-
 
 
 def compute_layout(ctx):

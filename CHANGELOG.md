@@ -1,21 +1,40 @@
 # CMD.Flow Changelog
 
-## [v0.4.0] – 2025-05-29
+## [v0.4.0] – 2025-07-25
 
 ### Added
-- New modular folder structure: `core/`, `ui/`, `utils/`, `visuals/`
-- Context management system with layout and state separation
-- FooterController system with key-action mapping
-- Project creation form with validation and curses cursor control
-- Project cards with dynamic progress bars
-- INFO panel with version/build display
-- Window size error screen with fallback behavior
-- Basic changelog panel and multi-view layout
-- Support for two languages
+- `short_desc` field support across all item types
+- `is_done` propagation system (automatic completion logic across hierarchy)
+- Project statistics in INFO panel (completed vs. remaining projects)
+- Nearest deadline indicator in INFO panel
+- Demo project data generator (from main menu)
+- BACKSPACE navigation for Project View
+- Refined add/edit/delete logic for all levels
+- Footer action visibility adjusted per context
+- Character limit enforcement for all input fields (configurable via `LayoutConfig`)
+- Toggleable status box in subtask detail view
+- View-specific behavior based on hierarchy level
+- English localization (full rewrite of UI strings)
+
+### Changed
+- Refactored backend logic for better update propagation
+- Unified add/edit system via `open_entry_form()`
+- Moved config values to centralized `layout_config` object
+- Rewritten view logic in `ProjectView` for clarity and modularity
+- Cleaned up main control loop (`main.py`) for stability
+
+### Fixed
+- Subtask toggle now reliably updates parent state
+- Flickering issue when returning from form to table view
+- Proper parent tracking via `get_parent()` helper
+- Prevented creation of children under subtasks
+- Footer no longer displays "New" action when invalid
+- Resolved erratic scroll behavior in detail tables
+- ENTER key behavior now properly distinguishes between branching and toggling
 
 ### Notes
-This is the first publicly usable version.
-Previous versions (v0.1.0 – v0.3.0) were early internal prototypes.
+This is the first **public**, feature-complete, modular version.  
+All major base systems are in place for future refinements and expansion.
 
 ---
 

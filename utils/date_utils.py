@@ -18,7 +18,7 @@ def get_nearest_deadline(projects):
                 if dt >= datetime.today():
                     upcoming.append(dt)
             except ValueError:
-                pass  # Hibás formátumot figyelmen kívül hagyjuk
+                pass
 
     def walk(obj):
         collect_deadlines(obj)

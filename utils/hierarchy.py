@@ -15,7 +15,7 @@ def get_parent(obj, projects):
 
     for project in projects:
         if obj == project:
-            return None  # A projektnek nincs szülője
+            return None
 
         for phase in getattr(project, "phases", []):
             if obj == phase:

@@ -22,12 +22,11 @@ class FooterController:
             self.draw(win, ctx)
         elif key in ('\n', 10, 13):
             return self.handle_key(key)
-        elif key in (9, '\t'):  # TAB
+        elif key in (9, '\t'):
             ctx.control.focus = ctx.control.last_focus
 
     
     def handle_key(self, key):
-        # ENTER-t vagy hozzárendelt shortcutot kezel
         if key in ('\n', 10, 13):
             action = self.actions[self.selected_idx]
             return action["callback"]()
@@ -41,13 +40,10 @@ class FooterController:
 
 
     def draw(self, win, ctx):
-
-        # Súgósor
         win.attron(curses.color_pair(11))
-        win.addstr(1, 2, "↑ ↓ = navigáció | ENTER = kiválasztás | ESC = vissza | TAB = menüszalag")
+        win.addstr(1, 2, "↑ ↓ = Navigation | ENTER = Select | ESC = Back | TAB = Footer")
         win.attroff(curses.color_pair(11))
         draw_info_panel(win, ctx.ui.version, str(ctx.ui.build))
-        # Footer action sor
         col = 2
         for i, action in enumerate(self.actions):
             text = f"[ {action['label']} ]"

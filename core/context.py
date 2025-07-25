@@ -6,7 +6,7 @@ class UIState:
         self.footer = None
         self.messages = []
         self.screen = {"rows": 0, "cols": 0}
-        self.version = "v0.4.0-pre7"
+        self.version = "v0.4.0-pre9"
         self.build = "N/A"
         self.logos = load_logo()
         self.compact = {
@@ -65,7 +65,7 @@ class LayoutConfig:
 class AppConfig:
     def __init__(self):
         self.theme = "default"
-        self.lang = "hu"
+        self.lang = "en"
         self.log_max_lines = 10
 
 

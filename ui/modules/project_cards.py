@@ -13,7 +13,7 @@ def draw_project_card(ctx, win, project, selected=False):
             for row in range(1, rows - 1):
                 win.hline(row, 1, " ", cols - 2, attr)
             win.addstr(2, 2, title[:cols - 4], curses.color_pair(0) | curses.A_REVERSE)
-            win.addstr(3, 2, f"Státusz: {status}"[:cols - 4], curses.color_pair(0) | curses.A_REVERSE)
+            win.addstr(3, 2, f"Status: {status}"[:cols - 4], curses.color_pair(0) | curses.A_REVERSE)
             border_chars=["┃", "┃", " ", " ", "┏", "┓", "┗", "┛"]
             win.border(*[ord(c) for c in border_chars])
         
@@ -21,13 +21,8 @@ def draw_project_card(ctx, win, project, selected=False):
             border_chars=["│", "│", "⎽", "⎺", "┌", "┐", "└", "┘"]
             win.border(*[ord(c) for c in border_chars])
             win.addstr(2, 2, title[:cols - 4])
-            win.addstr(3, 2, f"Státusz: {status}"[:cols - 4])
+            win.addstr(3, 2, f"Status: {status}"[:cols - 4])
             win.bkgd(' ', curses.color_pair(0) | curses.A_REVERSE)
-            
-        #border_chars=["│", "│", "─", "─", "╭", "╮", "╰", "╯"]
-        #border_chars=["█", "█", "▄", "▀", "▄", "▄", "▀", "▀"]
-        #border_chars=[" ", " ", "▄", "▀", " ", " ", " ", " "]
-        #border_chars=["┃", "┃", "━", "━", "┏", "┓", "┗", "┛"]
 
     except curses.error:
         pass

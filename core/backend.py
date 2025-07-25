@@ -1,7 +1,5 @@
-from utils.data_io import load_projects_from_file, save_projects_to_file
 from datetime import date
 
-# --- Osztályok ---
 
 class Subtask:
     _id_counter = 1
@@ -22,8 +20,6 @@ class Subtask:
         Subtask._id_counter = max(Subtask._id_counter, self.id + 1)
         self.title = title
         self.done = done
-
-        # New metadata fields
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
         self.short_desc = short_desc
@@ -67,8 +63,6 @@ class Task:
         Task._id_counter = max(Task._id_counter, self.id + 1)
         self.title = title
         self.subtasks: list[Subtask] = []
-
-        # New metadata fields
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
         self.short_desc = short_desc
@@ -129,8 +123,6 @@ class Phase:
         Phase._id_counter = max(Phase._id_counter, self.id + 1)
         self.title = title
         self.tasks: list[Task] = []
-
-        # New metadata fields
         self.creation_date = creation_date or date.today().isoformat()
         self.deadline = deadline
         self.short_desc = short_desc
@@ -253,9 +245,6 @@ class Project:
         project.phases = [Phase.from_dict(f) for f in data.get("phases", [])]
         return project
     
-
-
-
 def update_completion_status(projects):
     for project in projects:
         for phase in project.phases:

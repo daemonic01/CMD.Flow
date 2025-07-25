@@ -1,17 +1,12 @@
 import curses
 
 def render_boxed(
-    win,
-    draw_content_fn=None,
-    border=True,
-    title=None,
-    color_pair=0,
-    border_chars=None,
+    win, draw_content_fn=None,
+    border=True, title=None,
+    color_pair=0, border_chars=None,
     **kwargs
 ):
     try:
-
-
         if border:
             if border_chars and len(border_chars) == 8:
                 try:

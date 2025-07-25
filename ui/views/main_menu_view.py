@@ -76,13 +76,13 @@ class MainMenuView(BaseView):
 
         if (self.ctx.control.focus == "cards" and not self.footer_updated):
 
-            self.footer.add_action_once("Törlés", "d", lambda: PopupConfirmView(
+            self.footer.add_action_once("Delete", "d", lambda: PopupConfirmView(
             self.ctx,
-            message="Törlöd a kiválasztott projektet?",
+            message="Are you sure you want to delete the selected project?",
             on_accept=lambda: self.delete_selected_project(),
             on_cancel=lambda: "pop"
         ))
-            self.footer.add_action_once("Szerkesztés", "e", self.open_edit_form)
+            self.footer.add_action_once("Edit", "e", self.open_edit_form)
 
             self.footer_updated = True
 
@@ -191,7 +191,7 @@ class MainMenuView(BaseView):
                 title = projects[self.card_idx].title
                 return PopupConfirmView(
                     self.ctx,
-                    message=f"Törlöd a(z) „{title}” projektet?",
+                    message=f"Are you sure you delete „{title}”?",
                     on_accept=lambda: self.delete_selected_project(),
                     on_cancel=lambda: "pop"
                 )
@@ -210,13 +210,13 @@ class MainMenuView(BaseView):
             with open("changelog.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
         except FileNotFoundError:
-            data = {"Hiba": {"changes": ["A changelog.json fájl nem található."]}}
+            data = {"Error": {"changes": ["changelog.json file not found."]}}
 
         versions = list(data.keys())
         lines = []
         for v in versions:
             ver_data = data[v]
-            date = ver_data.get("date", "ismeretlen dátum")
+            date = ver_data.get("date", "Unkdown date")
             lines.append(("header", f"{v} – {date}"))
             for change in ver_data.get("changes", []):
                 lines.append(("item", f"  • {change}"))

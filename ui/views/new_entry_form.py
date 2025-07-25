@@ -15,7 +15,7 @@ class NewEntryFormView(BaseView):
         super().__init__(ctx)
         self.level = level
         self.parent = parent
-        self.fields = ["Név", "Rövid leírás", "Leírás", "Határidő (YYYY-MM-DD)", "Prioritás"]
+        self.fields = ["Name", "Short description", "Descrition", "Deadline (YYYY-MM-DD)", "Priority"]
         self.max_lengths = list(ctx.layout.field_max_lengths.values())
         self.values = initial_values or ["", "", "", "", ""]
         self.current_idx = 0
@@ -26,7 +26,7 @@ class NewEntryFormView(BaseView):
 
 
         self.footer = FooterController()
-        self.footer.add_action("Mentés", "s", self.save_and_exit)
+        self.footer.add_action("Save", "s", self.save_and_exit)
 
     def save_and_exit(self):
         row = self.calculate_rendered_rows()
@@ -61,7 +61,7 @@ class NewEntryFormView(BaseView):
             stdscr.addstr(3, 2, t("form.edit_title"), curses.A_BOLD | curses.A_UNDERLINE)
         else:
             stdscr.addstr(3, 2, t("form.title"), curses.A_BOLD | curses.A_UNDERLINE)
-        stdscr.addstr(5, 2, "↑/↓/ENTER: mezők között | F10: mentés | ESC: kilépés", curses.color_pair(11))
+        stdscr.addstr(5, 2, "↑/↓/ENTER: navigation | F10: save | ESC: exit", curses.color_pair(11))
 
         
 
@@ -136,14 +136,14 @@ class NewEntryFormView(BaseView):
             is_selected = (i == self.current_idx)
             stdscr.addstr(row, 4, label, curses.A_REVERSE if is_selected else curses.A_NORMAL)
 
-            if field == "Leírás" and self.values[i]:
+            if field == "Description" and self.values[i]:
                 wrapped = textwrap.wrap(self.values[i], wrap_width)
                 for j, line in enumerate(wrapped):
                     if row + j < max_y - 1:
                         stdscr.addstr(row + j, 4 + field_padding, line[:wrap_width])
                 row += max(1, len(wrapped))
             else:
-                display_val = self.values[i] if self.values[i] else "<nincs megadva>"
+                display_val = self.values[i] if self.values[i] else "<n/a>"
                 stdscr.addstr(row, 4 + field_padding, display_val[:wrap_width])
                 row += 1
 
@@ -163,7 +163,7 @@ class NewEntryFormView(BaseView):
     def calculate_cursor_pos(self, wrap_width, field_padding):
         cursor_row = 7
         for i in range(self.current_idx):
-            if self.fields[i] == "Leírás" and self.values[i]:
+            if self.fields[i] == "Description" and self.values[i]:
                 text = self.values[i]
                 wrapped_lines = (len(text) // wrap_width) + (1 if text else 1)
                 cursor_row += wrapped_lines + 1
@@ -172,7 +172,7 @@ class NewEntryFormView(BaseView):
                 cursor_row += 2
 
         if self.values[self.current_idx]:
-            if self.fields[self.current_idx] == "Leírás":
+            if self.fields[self.current_idx] == "Description":
                 text = self.values[self.current_idx]
                 cursor_row += len(text) // wrap_width
                 # simulate word-aware wrapping to match display

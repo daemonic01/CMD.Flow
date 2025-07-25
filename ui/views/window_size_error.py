@@ -29,7 +29,7 @@ def draw_window_size_error(stdscr):
     except curses.error:
         pass
 
-    stdscr.timeout(100000)  # várunk 300 ms-ot, majd visszatérünk (Igazából tök mindegy, ezt mire állítjuk. Minél több, annál ritkábban villog idegesítően a redraw.)
+    stdscr.timeout(100000)
     try:
         
         stdscr.getch()
@@ -50,12 +50,11 @@ def wait_for_valid_window_size(stdscr, min_rows=30, min_cols=70):
             prev_size = curr_size
 
             if rows < min_rows or cols < min_cols:
-                # csak akkor rajzolunk, ha túl kicsi
-                stdscr.erase()  # nem clear, csak törli a tartalmat, nem flash-el
+                stdscr.erase()
                 msg_lines = [
-                    "A program megjelenítése jelenleg nem támogatja ezt az ablakméretet.",
-                    "A folytatáshoz növeld meg az ablak méretét."
-                ]
+        t("errors.window_size_error_message_1"),
+        t("errors.window_size_error_message_2")
+    ]
                 start_row = max((rows - len(msg_lines)) // 2, 0)
                 for i, line in enumerate(msg_lines):
                     start_col = max((cols - len(line)) // 2, 0)

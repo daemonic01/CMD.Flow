@@ -8,7 +8,7 @@ class PopupConfirmView(BaseView):
         self.message = message
         self.on_accept = on_accept
         self.on_cancel = on_cancel
-        self.options = ["Igen", "Mégse"]
+        self.options = ["Yes", "Cancel"]
         self.selected_idx = 1
 
     def render(self, stdscr):
@@ -49,9 +49,9 @@ class PopupConfirmView(BaseView):
             self.selected_idx = (self.selected_idx + 1) % len(self.options)
         elif key in [10, 13, "\n"]:
             selected = self.options[self.selected_idx]
-            if selected == "Igen" and self.on_accept:
+            if selected == "Yes" and self.on_accept:
                 return self.on_accept()
-            elif selected == "Mégse" and self.on_cancel:
+            elif selected == "Cancel" and self.on_cancel:
                 return self.on_cancel()
             return "pop"
         elif key == '' or key == 27:
