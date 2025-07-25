@@ -8,6 +8,7 @@ CMD.Flow lets you create and manage structured projects with four hierarchical l
 ---
 
 ⚠️ Disclaimer
+
 This is my first complete terminal application project, written as a learning and exploration tool.
 Bugs, inconsistencies, or missing features may occur – but that’s part of the journey.
 
