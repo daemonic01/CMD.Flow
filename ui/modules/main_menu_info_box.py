@@ -2,6 +2,7 @@ import curses
 import datetime
 from utils.stats import count_done_projects
 from utils.localization import t
+from utils.date_utils import get_nearest_deadline
 
 def draw_menu_info_box(win, ctx, padding=1):
     try:
@@ -26,7 +27,10 @@ def draw_menu_info_box(win, ctx, padding=1):
         win.addstr(6, 3, f"{t("menu.loaded_projects")}: {len(ctx.data["projects"])}")
         win.addstr(7, 3, f"{done} {t("menu.projects_done")} | {not_done} {t("menu.projects_in_progress")}")
         win.hline(8, 1, "-", cols-2)
-        deadline_text = f"{t("menu.next_deadline")}: 2025.06.27"
+
+
+        nearest = get_nearest_deadline(ctx.data["projects"])
+        deadline_text = f"{t("menu.next_deadline")}: {nearest}"
         win.addstr(10, max((cols - len(deadline_text)) // 2, 0), deadline_text)
 
     except curses.error:

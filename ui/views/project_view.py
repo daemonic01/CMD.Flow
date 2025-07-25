@@ -95,7 +95,7 @@ class ProjectView(BaseView):
         if (self.ctx.control.focus == "project_details" and not self.footer_updated):
             selected = self.items[self.selected_idx][0]
             level, parent = self.get_add_target_info(selected)
-            if level:  # csak akkor adjunk hozzá gombot, ha van hova
+            if level:
                 self.footer.add_action_once("Új", "n", lambda: self.open_add_form(level, parent))
             self.footer.add_action_once("Szerkesztés", "e", self.open_edit_form)
             if not isinstance(selected, Project):
@@ -143,6 +143,23 @@ class ProjectView(BaseView):
                     self.table_selected_row -= 1
                     if self.table_selected_row < self.table_scroll_offset:
                         self.table_scroll_offset = self.table_selected_row
+
+            elif key in (curses.KEY_BACKSPACE, 127, 8, "\b"):
+                log("BACKSPACE PRESSED!!")
+                selected = self.items[self.selected_idx][0]
+                parent = get_parent(selected, self.ctx.data["projects"])
+                if parent:
+                    log("PARENT TRUE!!")
+                    for idx, (obj, _) in enumerate(self.items):
+                        if obj == parent:
+                            self.selected_idx = idx
+                            max_visible = self.layout["middle"][0].getmaxyx()[0] - 2
+                            if self.selected_idx >= self.scroll_offset + max_visible:
+                                self.scroll_offset = self.selected_idx - max_visible + 1
+                            elif self.selected_idx < self.scroll_offset:
+                                self.scroll_offset = self.selected_idx
+                            break
+
 
             elif key in (10, 13, "\n"):
                 parent = self.items[self.selected_idx][0]
@@ -229,7 +246,7 @@ class ProjectView(BaseView):
 
         def get_color_for_depth(depth):
             return {
-                -1: curses.color_pair(1),  # Projekt szint
+                -1: curses.color_pair(1),
                 0: curses.color_pair(2),
                 1: curses.color_pair(3),
                 2: curses.color_pair(4),

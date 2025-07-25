@@ -7,7 +7,7 @@ from ui.common.footer import FooterController
 from ui.views.base_view import BaseView
 from utils.layout import update_screen_size
 from ui.common.render_box import render_boxed
-from utils.logger import log
+from utils.localization import t
 
 
 class NewEntryFormView(BaseView):
@@ -57,7 +57,10 @@ class NewEntryFormView(BaseView):
         field_padding = 27
         wrap_width = max_x - field_padding - 6
 
-        stdscr.addstr(3, 2, f"Új {self.level} létrehozása", curses.A_BOLD | curses.A_UNDERLINE)
+        if self.edit_target:
+            stdscr.addstr(3, 2, t("form.edit_title"), curses.A_BOLD | curses.A_UNDERLINE)
+        else:
+            stdscr.addstr(3, 2, t("form.title"), curses.A_BOLD | curses.A_UNDERLINE)
         stdscr.addstr(5, 2, "↑/↓/ENTER: mezők között | F10: mentés | ESC: kilépés", curses.color_pair(11))
 
         

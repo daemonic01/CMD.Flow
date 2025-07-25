@@ -5,7 +5,7 @@
       "options": {
         "projects": "Projektkezelés",
         "new_project": "Új project létrehozása",
-        "settings": "Beállítások",
+        "demodata": "Demo struktúra generálása",
         "changelog": "Változásnapló",
         "exit": "Kilépés"
       },
@@ -25,6 +25,7 @@
 
     "form": {
       "title": "Új {level} létrehozása",
+      "edit_title": "Elem szerkesztése",
       "fields": {
         "name": "Név",
         "description": "Leírás",

@@ -13,7 +13,7 @@ from ui.views.window_size_error import draw_window_size_error
 from ui.views.new_entry_form import NewEntryFormView
 from ui.modules.changelog_panel import draw_changelog_panel
 from ui.views.project_view import ProjectView
-from utils.logger import log
+
 
 
 
@@ -30,7 +30,7 @@ class MainMenuView(BaseView):
         self.menu_items = [
             t("menu.options.projects"),
             t("menu.options.new_project"),
-            t("menu.options.settings"),
+            t("menu.options.demodata"),
             t("menu.options.changelog"),
             t("menu.options.exit")
         ]
@@ -92,13 +92,6 @@ class MainMenuView(BaseView):
 
 
 
-
-
-
-
-
-
-
         elif self.ctx.control.focus == "changelog":
             render_boxed(
                 self.layout["middle"][1],
@@ -137,13 +130,15 @@ class MainMenuView(BaseView):
             self.selected_idx = (self.selected_idx - 1) % len(self.menu_items)
         elif key == curses.KEY_DOWN:
             self.selected_idx = (self.selected_idx + 1) % len(self.menu_items)
-        elif key in (10, 13, "\n"):  # ENTER
+
+
+        elif key in (10, 13, "\n"):
             if self.selected_idx == 0:
                 self.ctx.control.focus = "cards"
             elif self.selected_idx == 1:
                 return NewEntryFormView(self.ctx, level="project")
             elif self.selected_idx == 2:
-                pass
+                create_demo_data(self.ctx)
             elif self.selected_idx == 3:
                 self.ctx.control.focus = "changelog"
             elif self.selected_idx == 4:
@@ -254,9 +249,6 @@ class MainMenuView(BaseView):
         self.scroll_offset = max(0, self.card_idx - visible + 1)
         self.ctx.control.focus = "cards"
         return "pop"
-    
-
-
 
 
     def open_edit_form(self):
@@ -279,3 +271,12 @@ class MainMenuView(BaseView):
             initial_values=values,
             edit_target=project
         )
+
+
+def create_demo_data(ctx):
+    from utils.demodata import generate_demo_data
+    from utils.data_io import save_projects_to_file
+
+    ctx.data["projects"] = generate_demo_data()
+    save_projects_to_file(ctx.data["projects"])
+
