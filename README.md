@@ -7,6 +7,16 @@ CMD.Flow lets you create and manage structured projects with four hierarchical l
 
 ---
 
+⚠️ Disclaimer
+This is my first complete terminal application project, written as a learning and exploration tool.
+Bugs, inconsistencies, or missing features may occur – but that’s part of the journey.
+
+CMD.Flow v0.4.0 is experimental.
+Future development will likely switch to a more flexible rendering platform (e.g. Textual),
+so this version serves as the final stable release of the original curses-based edition.
+
+---
+
 ## 🔧 Features (v0.4.0)
 
 - Four-level hierarchical structure (Project → Phase → Task → Subtask)
