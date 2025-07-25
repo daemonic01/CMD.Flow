@@ -51,7 +51,7 @@ Planned for future versions:
 
 - Settings panel (`config.ini`) support
 - Theme/skin system
-- Multilingual support (EN & HU)
+- Multilingual support
 - Compact/Normal/Extended view modes
 - Footer-integrated message logging (last 10 entries)
 - Structured system messages (INFO/WARNING/ERROR)
@@ -67,6 +67,7 @@ Planned for future versions:
 git clone https://github.com/<your-user>/CMDFlow.git
 cd CMDFlow
 python core/main.py
+ ```
 
 
 ---
