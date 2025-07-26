@@ -67,6 +67,12 @@ Planned for future versions:
 git clone https://github.com/<your-user>/CMDFlow.git
 cd CMDFlow
 python core/main.py
+
+or
+
+chmod +x start.sh
+./start.sh
+
  ```
 
 
