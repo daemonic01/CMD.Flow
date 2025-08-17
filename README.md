@@ -5,6 +5,8 @@ A minimalist, curses-based task & project workflow manager built entirely for th
 CMD.Flow lets you create and manage structured projects with four hierarchical levels:  
 **Project → Phase → Task → Subtask** – all displayed in a compact retro-style interface.
 
+This project currently 
+
 ---
 
 ⚠️ Disclaimer
@@ -15,6 +17,8 @@ Bugs, inconsistencies, or missing features may occur – but that’s part of th
 CMD.Flow v0.4.0 is experimental.
 Future development will likely switch to a more flexible rendering platform (e.g. Textual),
 so this version serves as the final stable release of the original curses-based edition.
+
+### ‼️ **Check out my current project, which is based on this one:** https://github.com/daemonic01/Glyph.Flow
 
 ---
 
